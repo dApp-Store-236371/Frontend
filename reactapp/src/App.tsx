@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import PurchasesPage from "./Pages/PurchasesPage/PurchasesPage";
 import AppsCatalogPage from "./Pages/AppsPage/AppsCatalogPage";
 import "./App.css";
-import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate, HashRouter } from "react-router-dom";
 import ErrorPage from "./Pages/ErrorPage/ErrorPage";
 import isElectron from "is-electron";
 import { ElectronMessages } from "./ElectronCommunication/ElectronMessages";
@@ -62,7 +62,7 @@ function App() {
 
   return (
     <div className="App">
-      <BrowserRouter>
+      <HashRouter>
         <LoginModal
           setIsWalletConnected={setIsWalletConnected}
           setCurrAccount={setCurrAccount}
@@ -148,7 +148,7 @@ function App() {
           style={{ clear: "both", height: "60px" }}
         ></div>{" "}
         <Footer />
-      </BrowserRouter>
+      </HashRouter>
     </div>
     /*
 <Route path={"/debug"} element={<AppDetailsModal />} />
