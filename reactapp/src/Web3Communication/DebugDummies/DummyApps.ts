@@ -1,5 +1,6 @@
 import AppData from "../../Pages/AppsPage/AppData";
 import dummy_car from "../../Misc/product_img/Audi_R8_2017_189_19_610_52_10_76_48_174_14_AWD_2_2_2dr_nUS.jpg";
+import {AppCategories} from "../../ReactConstants";
 
 const DUMMY_APPS: AppData[] = [];
 for (let i = 0; i < 50; i++) {
@@ -23,6 +24,7 @@ for (let i = 0; i < 50; i++) {
     published: i % 2 === 0 ? true : false,
     myRating: i % 5 === 0 ? undefined : (i % 5) * 20,
     magnetLink: "cool magnet",
+    category: AppCategories.Games
   });
 }
 
@@ -49,6 +51,7 @@ for (let i = 0; i < 20; i++) {
     owned: i % 2 === 0 ? true : false,
     published: true,
     myRating: i % 5 === 0 ? undefined : (i % 5) * 20,
+    category: AppCategories.Games
   });
 }
 
@@ -75,6 +78,7 @@ for (let i = 0; i < 20; i++) {
     owned: true,
     published: i % 2 === 0 ? true : false,
     myRating: i % 5 === 0 ? undefined : (i % 5) * 20,
+    category: AppCategories.Games
   });
 }
 export default DUMMY_APPS;

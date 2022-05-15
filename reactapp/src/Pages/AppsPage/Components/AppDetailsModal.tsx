@@ -136,37 +136,49 @@ export default function AppDetailsModal({
         setShow={setShowModal}
         tabIndex={-1}
         staticBackdrop={isLoading}
+
       >
         <MDBModalDialog centered>
           <MDBModalContent>
             <MDBModalHeader>
-              <MDBModalTitle>{app.name}</MDBModalTitle>
+              <div>
+                <MDBModalTitle>{app.name} </MDBModalTitle>
+
+
+              </div>
               {ownedState ? (
                 <Rating onClick={handleRatingChanged} ratingValue={rating} />
               ) : (
                 <></>
               )}
+
             </MDBModalHeader>
             <MDBModalBody>
+
               <MDBCardImage
                 src={app.img_url ? app.img_url : no_image_alt}
                 alt="..."
                 className="app-image"
               />
               <h4 id="description-paragraph-title">Description:</h4>
+
+
+
               <p id="description-paragraph" className="card-text">
                 {app.description}
               </p>
+
             </MDBModalBody>
 
-            <MDBModalFooter>
-              <div id="developer-text">
-                <span className="span_underline">Developer</span> :{app.company}
-              </div>
-              <div id="rating-text">
-                <span className="span_underline">Rating</span> : {app.rating}
-              </div>
+            <MDBModalFooter  style={{display: "block"}}>
 
+              <div style={{display: "flex", justifyContent: "space-around", textAlign: "center", margin: "auto"}}>
+                <h6 id="category-paragraph-modal-elem">{`Category`}  <br/> {app.category}</h6>
+                <h6 id="category-paragraph-modal-elem">{`Price`} <br/>{app.price} Wei</h6>
+                <h6 id="category-paragraph-modal-elem">{`Developer`} <br/> {app.company} </h6>
+                <h6 id="category-paragraph-modal-elem">{`Rating`} <br/> {app.rating == -1 ? "Not Rated" : app.rating}</h6>
+              </div>
+              <hr />
               <SpinnerButton onClick={handlePurchaseBtn}>
                 {getBtnText()}
               </SpinnerButton>

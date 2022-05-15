@@ -14,6 +14,16 @@
     margin-top: 5px;
 }
 
+#category-paragraph-title{
+    text-align: left;
+    margin-top: 1px;
+}
+
+#category-paragraph-modal-elem{
+    text-align: center;
+    margin-top: 1px;
+}
+
 #developer-text{
     text-align: left;
     position: absolute;

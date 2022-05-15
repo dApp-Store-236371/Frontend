@@ -40,7 +40,7 @@ export function PublishedAppsTable({
         },
       },
       {
-        Header: "Price",
+        Header: "Price (Wei)",
         accessor: "price",
       },
       {

@@ -13,6 +13,17 @@ export const PagePaths = {
 export const APPS_PER_PAGE: number = 16;
 export const MAX_DESCRIPTION_LENGTH: number = 300;
 
+
+export const AppCategories = {
+  All: "All",
+  Games: "Games",
+  Finance: "Finance",
+  Art: "Art & Design",
+  Communication: "Communication",
+  Education: "Education",
+  Other: "Other"
+}
+
 export const DEFAULT_EMPTY_APP: AppData = {
   id: 0,
   company: `Cool Dev`,
@@ -27,4 +38,5 @@ export const DEFAULT_EMPTY_APP: AppData = {
   owned: true,
   myRating: 4,
   published: true,
+  category: AppCategories.Games
 };

@@ -13,6 +13,7 @@ interface AppData {
   published: boolean;
   myRating?: number;
   magnetLink?: string;
+  category: string
 }
 
 export default AppData;

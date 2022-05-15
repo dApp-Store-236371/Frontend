@@ -5,16 +5,26 @@ import {
   ChangeEvent,
   Dispatch,
   FormEvent,
-  SetStateAction,
+  SetStateAction, useEffect,
   useState,
 } from "react";
 import { useLocation } from "react-router-dom";
-import { APPS_PER_PAGE, PagePaths } from "../../ReactConstants";
+import {AppCategories, APPS_PER_PAGE, PagePaths} from "../../ReactConstants";
 import AppData from "../AppsPage/AppData";
 import {
   getDisplayedApps,
   getDisplayedAppsObj,
 } from "../../Web3Communication/Web3ReactApi";
+import {
+  MDBBtn,
+  MDBDropdown,
+  MDBDropdownDivider,
+  MDBDropdownItem,
+  MDBDropdownLink,
+  MDBDropdownMenu,
+  MDBDropdownToggle
+} from "mdb-react-ui-kit";
+
 
 interface NavigationBarProps {
   setDisplayedApps: Dispatch<SetStateAction<Array<AppData>>>;
@@ -29,6 +39,7 @@ export default function NavigationBar({
 }: NavigationBarProps) {
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string>(AppCategories.All)
 
   const handleSearchSubmit = async (event: FormEvent) => {
     event.preventDefault(); //Otherwise refreshes the page
@@ -38,7 +49,8 @@ export default function NavigationBar({
       APPS_PER_PAGE,
       setDisplayedApps,
       setNumberOfPages,
-      searchQuery
+      searchQuery,
+        selectedCategory
     );
 
     //Reset the search query
@@ -47,8 +59,31 @@ export default function NavigationBar({
 
   const renderSearchbar = () => {
     if (location.pathname === PagePaths.AppsPagePath) {
+
       return (
-        <>
+        <div className={'search-div'}>
+
+            <select className="mdb-select md-form" onChange={(e) => {
+              console.log("Category: ", e.target.value)
+              setSelectedCategory(e.target.value)
+
+              getDisplayedApps(
+                  0,
+                  APPS_PER_PAGE,
+                  setDisplayedApps,
+                  setNumberOfPages,
+                  searchQuery,
+                  selectedCategory
+              );
+
+            }} defaultValue={AppCategories.All}>
+              <option  value="" >{AppCategories.All} </option>
+              {Object.values(AppCategories).filter(category => category !== AppCategories.All).map( (category) => (
+                  <option id={category} value={category}>{category}</option>
+              ) )}
+            </select>
+
+
           <form
             className="searchArea d-flex input-group w-auto"
             onSubmit={handleSearchSubmit}
@@ -67,7 +102,7 @@ export default function NavigationBar({
               <i className="fa fa-search"></i>
             </button>
           </form>
-        </>
+        </div>
       );
     } else {
     }

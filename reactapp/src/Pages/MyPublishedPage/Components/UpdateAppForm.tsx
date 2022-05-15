@@ -163,7 +163,7 @@ export default function UpdateForm({
                 name="price"
                 onChange={formik.handleChange}
                 id="price-input"
-                label="Price"
+                label="Price (Wei)"
               />
               {formik.errors.price ? (
                 <p className={"invalid-field-text"}>{formik.errors.price}</p>

@@ -12,6 +12,7 @@ import no_image_alt from "../../../Misc/app_no_image_alt.jpg";
 import dummy_car from "../../../Misc/product_img/Audi_R8_2017_189_19_610_52_10_76_48_174_14_AWD_2_2_2dr_nUS.jpg";
 import AppData from "../AppData";
 import "../../../CSS/appImage.css";
+import React from "react";
 
 interface AppTileProps {
   appData: AppData;
@@ -52,7 +53,7 @@ function AppTile({
             src={appData.img_url ? appData.img_url : no_image_alt}
             position="top"
             alt="..."
-            fluid
+
             className={"app-image"}
           />
         </div>
@@ -66,14 +67,21 @@ function AppTile({
       <MDBCardBody
         className="text-dark"
         style={{
-          height: "140px",
+          height: "230px",
           overflowY: "hidden",
           textOverflow: "ellipsis",
         }}
       >
         <MDBCardTitle>{appData.name}</MDBCardTitle>
-        <MDBCardText>{appData.description}</MDBCardText>
+          <h6 id="category-paragraph-title">{`Category: ${appData.category}`}</h6>
+          <h6 id="category-paragraph-title">{`Price: ${appData.price} Wei`}</h6>
+
+          <MDBCardText style={{
+
+
+          }}>{appData.description}</MDBCardText>
       </MDBCardBody>
+
       <MDBBtn
         style={{
           marginTop: "20px",

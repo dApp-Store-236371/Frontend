@@ -1,4 +1,4 @@
-import React, { ChangeEvent, Dispatch, SetStateAction, useState } from "react";
+import React, {ChangeEvent, Dispatch, SetStateAction, useEffect, useState} from "react";
 import {
   MDBInput,
   MDBBtn,
@@ -10,15 +10,15 @@ import {
   MDBFile,
 } from "mdb-react-ui-kit";
 import "../../../CSS/UploadForm.css";
-import { MAX_DESCRIPTION_LENGTH } from "../../../ReactConstants";
+import {AppCategories, APPS_PER_PAGE, MAX_DESCRIPTION_LENGTH} from "../../../ReactConstants";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import "../../../CSS/appImage.css";
 import AppData from "../../AppsPage/AppData";
-import { uploadApp } from "../../../Web3Communication/Web3ReactApi";
+import {getDisplayedApps, uploadApp} from "../../../Web3Communication/Web3ReactApi";
 import { toast } from "react-toastify";
 import { createMagnetLink } from "../../../../electronapp/main";
-
+import {MdNewLabel} from "react-icons/all";
 
 interface UploadFormProps {
   isUploading: boolean;
@@ -29,6 +29,7 @@ export default function UploadForm({
   setIsUploading,
 }: UploadFormProps) {
   const [uploadedImgUrl, setUploadedImgUrl] = useState<string>("");
+  const [weiToDollars, setWeiToDollars] = useState<number>(0)
 
   const onImgUrlChange = (e: ChangeEvent<HTMLInputElement>) => {
     setUploadedImgUrl(e.target.value);
@@ -38,6 +39,20 @@ export default function UploadForm({
     }
     formik.handleChange(e);
   };
+
+  useEffect(() => {
+    fetch('https://api.coinbase.com/v2/exchange-rates?currency=ETH')
+        .then(response => response.json())
+        .then(data => {
+          console.log(data.data.rates.BUSD)
+          const etherToUSD: number = data.data.rates.BUSD
+          console.log("etherToUSD: ", etherToUSD)
+          console.log("weiToUSD :" ,  etherToUSD / (1_000_000_000_000_000_000))
+          setWeiToDollars(etherToUSD / (1_000_000_000_000_000_000))
+
+
+        });
+  }, [])
 
   const formik = useFormik<any>({
     validateOnChange: false,
@@ -49,6 +64,7 @@ export default function UploadForm({
       description: "",
       img_url: "",
       company: "",
+      category:""
     },
     validationSchema: Yup.object({
       appFile: Yup.mixed().required("File is required"),
@@ -75,8 +91,12 @@ export default function UploadForm({
           "Must be a url of a png/jpg file!"
         )
         .url("Must be a url!"),
+       category: Yup.string()
+           .trim()
+           .required("Must select a category!")
     }),
     onSubmit: async (values) => {
+
       if (isUploading) {
         toast.error("Wait for upload to finish before starting another!");
         return;
@@ -97,7 +117,8 @@ export default function UploadForm({
         values.company,
         values.img_url,
         values.price,
-        "Placeholder SHA"
+        "Placeholder SHA",
+          values.category,
       )
         .then(() => {
           toast.update(publishingToastId, {
@@ -169,18 +190,35 @@ export default function UploadForm({
               <p className={"invalid-field-text"}>{formik.errors.company}</p>
             ) : null}{" "}
           </div>
+          <div className="col-md-4">
+
+            <select id={"category-input"} name={"category"} className="mdb-select md-form" onChange={(e) => formik.setFieldValue("category", e.target.value)} defaultValue={""}>
+              <option value={""} disabled selected >{"Category"}</option>
+              {Object.values(AppCategories).filter(category => category !== AppCategories.All).map( (category) => (
+                  <option key={category} value={category}>{category}</option>
+              ) )}
+            </select>
+            {formik.errors.category ? (
+                <p className={"invalid-field-text"}>{formik.errors.category}</p>
+            ) : null}{" "}
+          </div>
           <div className="row g-2">
-            <div className="col-md-2">
+            <div className="col-md-9" style={{display:"flex", alignItems: "center",
+              justifyContent: "left", gap: "1em"}}>
               <MDBInput
                 value={formik.values.price}
                 name="price"
                 onChange={formik.handleChange}
                 id="price-input"
-                label="Price"
+                label="Price (Wei)"
               />
               {formik.errors.price ? (
                 <p className={"invalid-field-text"}>{formik.errors.price}</p>
               ) : null}
+              {
+                (isNaN(formik.values.price)) ? <h6> </h6> :  <h6 >{`Approximately ${(formik.values.price * weiToDollars).toFixed(20)} $`}</h6>
+              }
+
             </div>
             <div className="col-md-6">
               <MDBInput

@@ -10,6 +10,7 @@ import {
   DAPPSTORE_CONTRACT_ADDRESS,
 } from "./Contracts/dAppContract";
 import { Dispatch, SetStateAction } from "react";
+import {AppCategories} from "../ReactConstants";
 
 export async function getPublishedApps() {
   if (IS_DEBUG) {
@@ -40,6 +41,7 @@ export async function getPublishedApps() {
             version: 1,
             publication_date: "1.1.1",
             published: solidityStruct.creator === getCurrAccount(),
+            category: AppCategories.Games
           };
           publishedApps.push(app);
         });
@@ -84,6 +86,7 @@ export async function getOwnedApps() {
             version: 1,
             publication_date: "1.1.1",
             published: solidityStruct.creator === getCurrAccount(),
+            category: AppCategories.Games
           };
           ownedApps.push(app);
         });
@@ -109,7 +112,8 @@ export const getDisplayedApps = async (
   itemsPerPage: number,
   setDisplayedApps: Dispatch<SetStateAction<Array<AppData>>>,
   setNumberOfPages: Dispatch<SetStateAction<number>>,
-  filter?: string
+  filter?: string,
+  selectedCategory?: string
 ) => {
   //request to fetch apps [(pageNum*itemsPerPage + 1), (pageNum*itemsPerPage + itemsPerPage) )
   let res: getDisplayedAppsObj;
@@ -118,7 +122,7 @@ export const getDisplayedApps = async (
     setDisplayedApps(res.displayedApps);
     setNumberOfPages(res.pageCount);
   } else {
-    res = await fetchDisplayedApps(itemsPerPage, pageNum, filter);
+    res = await fetchDisplayedApps(itemsPerPage, pageNum, filter, selectedCategory);
     setDisplayedApps(res.displayedApps);
     setNumberOfPages(res.pageCount);
   }
@@ -189,7 +193,8 @@ export const uploadApp = async (
   company: string,
   img_url: string,
   price: number,
-  sha: string
+  sha: string,
+  category: string
 ) => {
   console.log("Uploading App: ", name);
 
@@ -261,7 +266,8 @@ export const updateApp = async (
 const fetchDisplayedApps = async (
   itemsPerPage: number,
   currPageNum: number,
-  filter?: string
+  filter?: string,
+  selectedCategory?: string
 ) => {
   let contract = await createContract(
     DAPPSTORE_ABI,
@@ -297,6 +303,7 @@ const fetchDisplayedApps = async (
           version: 1,
           publication_date: "1.1.1",
           published: solidityStruct.creator === getCurrAccount(),
+          category: AppCategories.Games
         };
         appsToDisplay.push(app);
       });
