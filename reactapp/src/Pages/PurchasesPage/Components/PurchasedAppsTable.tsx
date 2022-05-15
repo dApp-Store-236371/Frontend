@@ -13,6 +13,8 @@ import Button from "react";
 import isElectron from "is-electron";
 import { MDBBtn } from "mdb-react-ui-kit";
 import FallbackImg from "../../../Misc/fix-invalid-image-error.png";
+import { downloadMagnetLink } from "../../../../electronapp/main";
+
 interface purchasedAppsTableProps {
   ownedApps: AppData[];
   setSelectedAppData: Dispatch<SetStateAction<AppData>>;
@@ -113,6 +115,14 @@ export function PurchasedAppsTable({
       console.log("Row data to download: ", rowData);
       setSelectedAppData(rowData);
       setShowModal(true);
+      let magnetLink = rowData.magnetLink;
+      if (magnetLink == undefined) {
+        console.log("No magnet link found, can't download");
+      } else {
+        console.log("Got magnet link : ", magnetLink)
+        downloadMagnetLink(magnetLink);
+      }
+      
     } else {
       window.open("https://easyupload.io/ihr4mn");
     }

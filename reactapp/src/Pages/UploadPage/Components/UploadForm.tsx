@@ -17,6 +17,9 @@ import "../../../CSS/appImage.css";
 import AppData from "../../AppsPage/AppData";
 import { uploadApp } from "../../../Web3Communication/Web3ReactApi";
 import { toast } from "react-toastify";
+import { createMagnetLink } from "../../../../electronapp/main";
+
+
 interface UploadFormProps {
   isUploading: boolean;
   setIsUploading: Dispatch<SetStateAction<boolean>>;
@@ -83,11 +86,13 @@ export default function UploadForm({
       let publishingToastId = toast.loading(`Publishing ${values.name}...`, {
         autoClose: false,
       });
+
+      let magnet_link = createMagnetLink(values.appFile);
       //createTorrent(values.appFile);
       //.then ( (results from electron which include magnet link & SHA) => {
       uploadApp(
         values.name,
-        "Placeholder magnet",
+        magnet_link,
         values.description,
         values.company,
         values.img_url,

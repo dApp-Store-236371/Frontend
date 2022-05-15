@@ -83,33 +83,25 @@ app.on("window-all-closed", function () {
   if (process.platform !== "darwin") app.quit();
 });
 
-const downloadAppButton = document.getElementById('button_id');
-downloadAppButton.addEventListener('click', () => {
-  downloadMagnetLink(magnet_link);
-});
 
-const uploadAppButton = document.getElementById('button_id');
-uploadAppButton.addEventListener('click', () => {
-  createMagnetLink();
-});
-
-function downloadMagnetLink(magnet_link) {
+export function downloadMagnetLink(magnet_link) {
   
   var WebTorrent = require('webtorrent');
   var torrent_client = new WebTorrent();
 
   torrent_client.add(magnet_link, function (torrent) {
-    var file = torrent.files.find(function (file) {
-      return file.name.endsWith('.txt'); // test
+    torrent.on('done', function () {
+      console.log('torrent download finished')
     })
   })
 }
 
-function createMagnetLink() {
+export function createMagnetLink(file) {
   var WebTorrent = require('webtorrent-hybrid')
   var torrent_client = new WebTorrent()
 
-  client.seed('/seed-me.txt', function (torrent) {
+  client.seed(file, function (torrent) {
       console.log('Client is seeding ' + torrent.magnetURI)
   })
+  return torrent.magnetURI;
 }
