@@ -72,6 +72,7 @@ export default function AppDetailsModal({
 
     if (ownedState) {
       if (isElectron()) {
+
         // Do download
       } else {
         window.open("https://easyupload.io/ihr4mn");
