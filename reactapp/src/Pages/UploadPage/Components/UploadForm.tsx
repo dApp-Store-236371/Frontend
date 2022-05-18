@@ -17,8 +17,11 @@ import "../../../CSS/appImage.css";
 import AppData from "../../AppsPage/AppData";
 import {getDisplayedApps, uploadApp} from "../../../Web3Communication/Web3ReactApi";
 import { toast } from "react-toastify";
-import { createMagnetLink } from "../../../../electronapp/main";
+//import { createMagnetLink } from "../../../../electronapp/main";
 import {MdNewLabel} from "react-icons/all";
+import { IS_ON_ELECTRON } from "../../../ElectronCommunication/SharedElectronConstants";
+import ElectronMessages from "../../../ElectronCommunication/ElectronMessages";
+//import { createMagnetLink } from "../../../electronCommunication";
 
 interface UploadFormProps {
   isUploading: boolean;
@@ -39,6 +42,33 @@ export default function UploadForm({
     }
     formik.handleChange(e);
   };
+
+  async function createMagnetLink(path: string){
+      let magnetLink = ""
+
+      if (IS_ON_ELECTRON) {
+        console.log("Creating magnet link")
+
+        const { ipcRenderer } = window.require("electron");
+        if (IS_ON_ELECTRON) {
+          const { ipcRenderer } = window.require("electron");
+          console.log("Before ipcRenderer")
+
+          magnetLink = await ipcRenderer
+            .invoke(ElectronMessages.ElectronMessages.CREATE_MAGNET, JSON.stringify({ path: path }))
+            .then((result: any) => {
+              console.log("createMagnet reply:" + result);
+
+              return result
+            });
+          return magnetLink
+        }
+
+      }
+    console.log("Returning empty magnet")
+
+    return magnetLink
+  }
 
   useEffect(() => {
     fetch('https://api.coinbase.com/v2/exchange-rates?currency=ETH')
@@ -106,8 +136,11 @@ export default function UploadForm({
       let publishingToastId = toast.loading(`Publishing ${values.name}...`, {
         autoClose: false,
       });
+      const file = values.appFile
+      console.log("form values: ", values)
+      let magnet_link = await createMagnetLink(values.appFile);
 
-      let magnet_link = createMagnetLink(values.appFile);
+
       //createTorrent(values.appFile);
       //.then ( (results from electron which include magnet link & SHA) => {
       uploadApp(

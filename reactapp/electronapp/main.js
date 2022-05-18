@@ -2,6 +2,11 @@
 const { app, BrowserWindow, session } = require("electron");
 const path = require("path");
 
+const {dialog} = require('electron');
+
+
+
+
 require("@electron/remote/main").initialize();
 const {
   REACT_ADDRESS,
@@ -37,7 +42,7 @@ function createWindow() {
 
 
 
-  console.log(`React Address: ${REACT_ADDRESS}`);
+  //console.log(`React Address: ${REACT_ADDRESS}`);
   /* Development */
   //mainWindow.loadURL(REACT_ADDRESS);
 
@@ -46,20 +51,25 @@ function createWindow() {
 
   /* Packaged App */
   //mainWindow.loadFile('process.resourcesPath'+'\\index.html')
-  if(app.isPackaged){
-    mainWindow.loadFile(process.resourcesPath+'\\app\\build\\index.html')
-  }
-  else{
-    mainWindow.loadURL(REACT_ADDRESS)
-  }
-
+  // if(app.isPackaged){
+  //   mainWindow.loadFile(process.resourcesPath+'\\app\\build\\index.html')
+  // }
+  // else{
+  //   mainWindow.loadURL(REACT_ADDRESS)
+  // }
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools({ mode: "detach" });
+  console.log("HERE")
+
+   torrentUploadExperiment()
+
 }
 
+
+
+
 const { ipcMain } = require("electron");
-const { dialog } = require("electron");
 
 ipcMain.on("alert", (event, data) => {
   // here we can process the data
@@ -83,6 +93,52 @@ ipcMain.handle(ElectronMessages.ECHO_MSG, async (event, ...args) => {
   return args;
 });
 
+ipcMain.handle(ElectronMessages.CREATE_MAGNET, async (event, ...args) => {
+  console.log("Electron CREATE MAGNET")
+  console.log(args);
+
+
+  const path = await dialog.showOpenDialog({properties: ['openFile'] }).then(function (response) {
+    if (!response.canceled) {
+      // handle fully qualified file name
+      console.log(response.filePaths[0]);
+      return (response.filePaths[0])
+    } else {
+      console.log("no file selected");
+      return ("")
+    }
+  })
+  console.log("path = ", path)
+  createMagnetLink(path);
+
+  return args;
+});
+
+
+async function getFilePath(){
+  return await dialog.showOpenDialog({properties: ['openFile'] }).then(function (response) {
+    if (!response.canceled) {
+      // handle fully qualified file name
+      console.log(response.filePaths[0]);
+
+      return (response.filePaths[0])
+    } else {
+      console.log("no file selected");
+      return ("")
+    }
+  })
+}
+
+async function torrentUploadExperiment(){
+  const path = await getFilePath()
+
+  const magnetLink = createMagnetLink(path)
+
+
+}
+
+
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -98,25 +154,36 @@ app.on("window-all-closed", function () {
   if (process.platform !== "darwin") app.quit();
 });
 
+//
+// export function downloadMagnetLink(magnet_link) {
+//
+//   var WebTorrent = require('webtorrent');
+//   var torrent_client = new WebTorrent();
+//
+//   torrent_client.add(magnet_link, function (torrent) {
+//     torrent.on('done', function () {
+//       console.log('torrent download finished')
+//     })
+//   })
+// }
 
-export function downloadMagnetLink(magnet_link) {
-  
-  var WebTorrent = require('webtorrent');
-  var torrent_client = new WebTorrent();
 
-  torrent_client.add(magnet_link, function (torrent) {
-    torrent.on('done', function () {
-      console.log('torrent download finished')
-    })
-  })
-}
 
-export function createMagnetLink(file) {
-  var WebTorrent = require('webtorrent-hybrid')
-  var torrent_client = new WebTorrent()
+async function createMagnetLink(file) {
+  console.log('entered createMagnetLink from electron. file=', file)
 
-  client.seed(file, function (torrent) {
+  //const WebTorrent = require('webtorrent-hybrid')
+  const WebTorrent = require('webtorrent')
+
+  const torrent_client = new WebTorrent()
+  let res = await torrent_client.seed(file, function (torrent) {
       console.log('Client is seeding ' + torrent.magnetURI)
+    console.log("in seed: ", torrent)
+    res = torrent.magnetURI
+    return res
   })
-  return torrent.magnetURI;
+
+  console.log("torrent seed res: ", res)
+
+  return res;
 }

@@ -4,12 +4,11 @@
   "homepage": "./",
   "private": true,
   "author": {
-    "name" : "Carmel Hecht",
-    "email" : "hechtcarmel@campus.technion.ac.il",
-    "url" : "http://barnyrubble.tumblr.com/"
+    "name": "Carmel Hecht",
+    "email": "hechtcarmel@campus.technion.ac.il",
+    "url": "http://barnyrubble.tumblr.com/"
   },
   "description": "Cool dAppstore",
-
   "dependencies": {
     "@electron/remote": "^2.0.8",
     "@metamask/detect-provider": "^1.2.0",
@@ -53,6 +52,7 @@
     "web-vitals": "^2.1.4",
     "web3": "^1.7.3",
     "web3modal": "^1.9.6",
+    "webtorrent": "^1.8.20",
     "yup": "^0.32.11"
   },
   "main": "electronapp/main.js",
