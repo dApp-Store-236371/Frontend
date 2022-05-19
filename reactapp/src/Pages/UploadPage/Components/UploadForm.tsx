@@ -54,16 +54,18 @@ export default function UploadForm({
   }, [])
 
   const formik = useFormik<any>({
+
     validateOnChange: false,
     validateOnBlur: false,
     initialValues: {
       appFile: "",
-      name: "",
-      price: "",
-      description: "",
-      img_url: "",
-      company: "",
+      name: "App Name",
+      price: "50",
+      description: "Default App Description",
+      img_url: "https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png",
+      company: "Default Company",
       category:""
+
     },
     validationSchema: Yup.object({
       appFile: Yup.mixed().required("File is required"),
