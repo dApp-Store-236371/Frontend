@@ -14,7 +14,8 @@ function AppsCatalog(props: AppsCatalogProps) {
   return (
     <>
 
-
+  <FeaturedAppsTile toggleShowModal={props.toggleShowModal}
+          setSelectedAppData={props.setSelectedAppData} />
     <div id="apps-catalog-warpper">
       {props.displayedApps.map((appData) => (
         <AppTile
