@@ -41,6 +41,7 @@ function AppTile({
         padding: "3px",
         margin: "10px",
         marginTop: "20px",
+        width: "100%"
       }}
     >
       <MDBRipple

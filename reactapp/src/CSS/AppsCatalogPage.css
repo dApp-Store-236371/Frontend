@@ -39,8 +39,8 @@
 }
 
 #apps-catalog {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    /* display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr; */
     gap: 0px;
     margin-left: 6rem;
     margin-bottom: 110px;
@@ -50,13 +50,18 @@
     font-size: 2em;
 }
 
-#pagination-div{
+#pagination-div {
     position: fixed;
     width: 500px;
     height: 200px;
-
     top: 100%;
     left: 50vw;
     margin-top: -100px;
     margin-left: -250px;
+}
+
+#apps-catalog-warpper {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
 }
