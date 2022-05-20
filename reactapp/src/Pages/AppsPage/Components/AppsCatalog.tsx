@@ -3,6 +3,7 @@ import "../../../CSS/AppsCatalogPage.css";
 import { Dispatch, SetStateAction } from "react";
 import AppData from "../AppData";
 import Pagination from "./Pagination";
+import { FeaturedAppsTile } from "./FeaturedAppTile";
 interface AppsCatalogProps {
   displayedApps: AppData[];
   setDisplayedApps: Dispatch<SetStateAction<AppData[]>>;
@@ -12,6 +13,10 @@ interface AppsCatalogProps {
 function AppsCatalog(props: AppsCatalogProps) {
   return (
     <>
+
+  <FeaturedAppsTile toggleShowModal={props.toggleShowModal}
+          setSelectedAppData={props.setSelectedAppData} />
+    <div id="apps-catalog-warpper">
       {props.displayedApps.map((appData) => (
         <AppTile
           key={appData.id}
@@ -20,6 +25,7 @@ function AppsCatalog(props: AppsCatalogProps) {
           setSelectedAppData={props.setSelectedAppData}
         />
       ))}
+      </div>
     </>
   );
 }

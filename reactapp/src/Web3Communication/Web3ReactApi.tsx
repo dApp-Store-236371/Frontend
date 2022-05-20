@@ -318,3 +318,14 @@ const fetchDisplayedApps = async (
   console.log("res= ", res);
   return res;
 };
+
+export async function getFeaturedApp() : Promise<AppData> {
+    //TODO: fetch number of apps, and then an app randomly.
+  
+    //Meanwhile:
+    const numOfApps = DUMMY_APPS.length;
+    const featuredAppIndex =Math.floor(Math.random() * numOfApps-1);
+    return DUMMY_APPS[featuredAppIndex];
+
+
+}
