@@ -3,6 +3,11 @@ const { app, BrowserWindow, session } = require("electron");
 const path = require("path");
 
 const {dialog} = require('electron');
+// const { WebTorrent } = require('webtorrent')
+const SimplePeer = require('simple-peer')
+const thunky = require('thunky')
+const prettierBytes = require('prettier-bytes')
+const throttle = require('throttleit')
 
 
 
@@ -19,25 +24,27 @@ const fs = require("fs");
 const url = require("url");
 
 
+
+
 function createWindow() {
   // Create the browser window.
   console.log("Creating Electron Window");
   //clearAllUserData();
   console.log(process.resourcesPath)
-  const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
-    webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
-      nodeIntegration: true,
-      enableRemoteModule: true,
-      contextIsolation: false,
-      webSecurity: false,
-      show: false,
-    },
-  });
-  mainWindow.maximize();
-  mainWindow.show();
+  // const mainWindow = new BrowserWindow({
+  //   width: 800,
+  //   height: 600,
+  //   webPreferences: {
+  //     preload: path.join(__dirname, "preload.js"),
+  //     nodeIntegration: true,
+  //     enableRemoteModule: true,
+  //     contextIsolation: false,
+  //     webSecurity: false,
+  //     show: false,
+  //   },
+  // });
+  // mainWindow.maximize();
+  // mainWindow.show();
   // and load the index.html of the app.
 
 
@@ -59,9 +66,8 @@ function createWindow() {
   // }
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools({ mode: "detach" });
-  console.log("HERE")
-
+  // mainWindow.webContents.openDevTools({ mode: "detach" });
+  // console.log("HERE")
    torrentUploadExperiment()
 
 }
@@ -132,7 +138,9 @@ async function getFilePath(){
 async function torrentUploadExperiment(){
   const path = await getFilePath()
 
-  const magnetLink = createMagnetLink(path)
+  const magnet_link = createMagnetLink(path)
+  console.log("IM RIGHT HERE PRINTING")
+  console.log(magnet_link)
 
 
 }
@@ -168,22 +176,84 @@ app.on("window-all-closed", function () {
 // }
 
 
-
-async function createMagnetLink(file) {
-  console.log('entered createMagnetLink from electron. file=', file)
-
-  //const WebTorrent = require('webtorrent-hybrid')
+function createMagnetLink(file) {
   const WebTorrent = require('webtorrent')
+  console.log('entered createMagnetLink from electron. file=', file)
+  var client = new WebTorrent()
+  seed([file], client);
 
-  const torrent_client = new WebTorrent()
-  let res = await torrent_client.seed(file, function (torrent) {
-      console.log('Client is seeding ' + torrent.magnetURI)
-    console.log("in seed: ", torrent)
-    res = torrent.magnetURI
-    return res
-  })
-
-  console.log("torrent seed res: ", res)
-
-  return res;
+  // torrent_client.seed(file, function (torrent) {
+  //   //   console.log('Client is seeding ' + torrent.magnetURI)
+  //   // console.log("in seed: ", torrent)
+  //   // res = torrent.magnetURI
+  //   // return res
+  //   console.log("MANGET AVAILABE HERE ", torrent.magnetURI)
+  //   return torrent.magnetURI
+  // })
 }
+
+
+warning = function warning (err) {
+  console.error(err.stack || err.message || err)
+  return console.log(err.message || err)
+}
+
+error = function error (err) {
+  console.error(err.stack || err.message || err)
+  const p = console.log(err.message || err)
+  p.style.color = 'red'
+  p.style.fontWeight = 'bold'
+  return p
+}
+
+
+function seed (files, client) {
+  if (files.length === 0) return
+  console.log('Seeding ' + files.length + ' files')
+
+  // Seed from WebTorrent
+  client.seed(files, onTorrent)
+}
+
+DoUpdateSpeed = function DoUpdateSpeed (str) {
+  console.log("Im updating some speed I promise")
+  console.log(str)  
+}
+
+
+function onTorrent (torrent) {
+  torrent.on('warning', warning)
+
+  const torrentFileName = path.basename(torrent.name, path.extname(torrent.name)) + '.torrent'
+
+  console.log('"' + torrentFileName + '" contains ' + torrent.files.length + ' files:')
+
+
+  function updateSpeed () {
+    const progress = (100 * torrent.progress).toFixed(1)
+
+    let remaining
+    if (torrent.done) {
+      remaining = 'Done.'
+      return
+    } else {
+      remaining = torrent.timeRemaining !== Infinity
+        ? formatDistance(torrent.timeRemaining, 0, { includeSeconds: true })
+        : 'Infinity years'
+      remaining = remaining[0].toUpperCase() + remaining.substring(1) + ' remaining.'
+    }
+
+    DoUpdateSpeed(
+      '<b>Peers:</b> ' + torrent.numPeers + ' ' +
+      '<b>Progress:</b> ' + progress + '% ' +
+      '<b>ETA:</b> ' + remaining
+    )
+  }
+
+  torrent.on('download', throttle(updateSpeed, 250))
+  torrent.on('upload', throttle(updateSpeed, 250))
+  setInterval(updateSpeed, 5000)
+  updateSpeed()
+}
+
+
