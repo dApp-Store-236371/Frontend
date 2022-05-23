@@ -60,6 +60,34 @@ function App() {
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [currAccount, setCurrAccount] = useState<string>("");
 
+  const [downloadingApps, setDownloadingApps] = useState<AppData[]>([]);
+  
+
+  if(isElectron()){
+    const { ipcRenderer } = window.require("electron");
+    console.log("DEBUG Awaiting Electron state updates")
+    ipcRenderer.on("download-progress-update", (event:any, arg:any) => {
+      console.log("DEBUG RECEIVED ELECTRON DOWNLOAD UPDATE")
+      const appId = arg.appId;
+      const progress = arg.progress;
+      updateDownloadProgress(appId, progress);
+    });
+  }
+
+  async function updateDownloadProgress(appId: AppData, progress: number, ){
+    if (isElectron() || true) {
+      const tmp = downloadingApps.filter(app => app.id === appId.id)
+      if(tmp.length > 0){
+        const toastId = tmp[0].toastDownloadId;
+        toast.update(toastId, {
+          render: `Downloading ${appId.name}... ${progress}%`,
+          type: toast.TYPE.INFO,
+          autoClose: false
+        })
+      }
+    }
+}
+
   return (
     <div className="App">
       <HashRouter>
@@ -92,6 +120,8 @@ function App() {
                 isLoading={isLoading}
                 setIsLoading={setIsLoading}
                 currAccount={currAccount}
+                downloadingApps={downloadingApps}
+                setDownloadingApps={setDownloadingApps}
               />
             }
           />
@@ -105,6 +135,8 @@ function App() {
                   userId={userId}
                   ownedApps={ownedApps}
                   setOwnedApps={setOwnedApps}
+                  downloadingApps={downloadingApps}
+                  setDownloadingApps={setDownloadingApps}
                 />
               ) : (
                 <LoginPage />

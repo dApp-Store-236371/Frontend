@@ -14,6 +14,7 @@ interface AppData {
   myRating?: number;
   magnetLink?: string;
   category: string
+  toastDownloadId?: any
 }
 
 export default AppData;

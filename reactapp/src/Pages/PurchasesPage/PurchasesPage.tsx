@@ -10,12 +10,14 @@ import {
   getPublishedApps,
 } from "../../Web3Communication/Web3ReactApi";
 
-interface PublishedProps {
+interface PurchasedProps {
   ownedApps: AppData[];
   setOwnedApps: Dispatch<SetStateAction<AppData[]>>;
   userId: string;
   isLoading: boolean;
   setIsLoading: Dispatch<SetStateAction<boolean>>;
+  downloadingApps: AppData[];
+  setDownloadingApps: Dispatch<SetStateAction<AppData[]>>;
 }
 
 function PurchasesPage({
@@ -24,7 +26,9 @@ function PurchasesPage({
   userId,
   isLoading,
   setIsLoading,
-}: PublishedProps) {
+  downloadingApps,
+  setDownloadingApps,
+}: PurchasedProps) {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [selectedAppData, setSelectedAppData] =
     useState<AppData>(DEFAULT_EMPTY_APP);
@@ -45,6 +49,8 @@ function PurchasesPage({
         setShowModal={setShowModal}
         setSelectedAppData={setSelectedAppData}
         ownedApps={ownedApps}
+        appsToDownload={downloadingApps}
+        setAppsToDownload={setDownloadingApps}
       />
       ;
     </>
