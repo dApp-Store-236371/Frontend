@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useMemo } from "react";
+import React, { Dispatch, SetStateAction, useMemo, useState } from "react";
 import AppData from "../../AppsPage/AppData";
 import {
   useTable,
@@ -13,17 +13,26 @@ import Button from "react";
 import isElectron from "is-electron";
 import { MDBBtn } from "mdb-react-ui-kit";
 import FallbackImg from "../../../Misc/fix-invalid-image-error.png";
+import { startDownload } from "../../Shared/utils";
 interface purchasedAppsTableProps {
   ownedApps: AppData[];
   setSelectedAppData: Dispatch<SetStateAction<AppData>>;
   setShowModal: Dispatch<SetStateAction<boolean>>;
+  appsToDownload: AppData[];
+  setAppsToDownload: Dispatch<SetStateAction<AppData[]>>;
 }
+
+
 
 export function PurchasedAppsTable({
   ownedApps,
   setSelectedAppData,
   setShowModal,
+  appsToDownload,
+  setAppsToDownload,
 }: purchasedAppsTableProps) {
+
+
   const columns = useMemo(
     () => [
       {
@@ -65,6 +74,7 @@ export function PurchasedAppsTable({
           <div>
             <MDBBtn
               size={"sm"}
+              disabled={appsToDownload.filter(app => app.id === value.cell.row.original.id).length > 0}
               onClick={() => downloadBtnHandler(value.cell.row.original)}
             >
               {isElectron()
@@ -81,7 +91,7 @@ export function PurchasedAppsTable({
         ),
       },
     ],
-    []
+    [appsToDownload]
   );
   const data = useMemo(() => ownedApps, [ownedApps]);
 
@@ -108,11 +118,12 @@ export function PurchasedAppsTable({
 
   const { pageIndex, globalFilter } = state;
 
-  const downloadBtnHandler = (rowData: AppData) => {
+  const downloadBtnHandler = async (rowData: AppData) => {
     if (isElectron() || true) {
       console.log("Row data to download: ", rowData);
       setSelectedAppData(rowData);
-      setShowModal(true);
+      // setShowModal(true);
+      await startDownload(rowData, appsToDownload, setAppsToDownload)
     } else {
       window.open("https://easyupload.io/ihr4mn");
     }

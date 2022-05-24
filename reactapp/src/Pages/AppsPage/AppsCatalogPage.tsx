@@ -18,6 +18,8 @@ interface AppsCatalogPageProps {
   isLoading: boolean;
   setIsLoading: Dispatch<SetStateAction<boolean>>;
   currAccount: string;
+  downloadingApps: Array<AppData>;
+  setDownloadingApps: Dispatch<SetStateAction<Array<AppData>>>;
 }
 
 function AppsCatalogPage(props: AppsCatalogPageProps) {
@@ -55,6 +57,8 @@ function AppsCatalogPage(props: AppsCatalogPageProps) {
         setShowModal={setShowModal}
         isLoading={props.isLoading}
         setIsLoading={props.setIsLoading}
+        downloadingApps={props.downloadingApps}
+        setDownloadingApps={props.setDownloadingApps}
       />
       <div id="apps-catalog">
         <AppsCatalog
