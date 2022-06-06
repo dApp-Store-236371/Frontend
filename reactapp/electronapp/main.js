@@ -18,7 +18,8 @@ const {
 const fs = require("fs");
 const url = require("url");
 
-
+// const { tmp } = require('./ipfs')
+// tmp()
 
 
 async function createWindow() {
@@ -88,11 +89,11 @@ async function createWindow() {
 
     console.log("Main: ", magnetLink)
 
-    await new Promise(resolve => setTimeout(resolve, 20000));
-    while (true) {
-        //sleep in js
-        await new Promise(resolve => setTimeout(resolve, 1000));
-    }
+    // await new Promise(resolve => setTimeout(resolve, 20000));
+    // while (true) {
+    //     //sleep in js
+    //     await new Promise(resolve => setTimeout(resolve, 1000));
+    // }
     // downloadMagnetLink(magnetLink)
 }
 
@@ -186,6 +187,9 @@ async function getFilePath() {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+
+
+
     createWindow();
     app.on("activate", function() {
         if (BrowserWindow.getAllWindows().length === 0) createWindow();
