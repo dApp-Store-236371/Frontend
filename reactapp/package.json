@@ -55,6 +55,7 @@
     "web3": "^1.7.3",
     "web3modal": "^1.9.6",
     "webtorrent": "^1.8.20",
+    "webtorrent-hybrid-electron": "^0.1.0",
     "yup": "^0.32.11"
   },
   "main": "electronapp/main.js",
