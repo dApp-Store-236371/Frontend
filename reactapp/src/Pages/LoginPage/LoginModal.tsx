@@ -1,11 +1,9 @@
 import {
-  connectWalletToGanacheNoModal,
   connectWalletWithModal,
   web3,
 } from "../../Web3Communication/Web3Init";
 import {
   MDBBtn,
-  MDBCardImage,
   MDBModal,
   MDBModalBody,
   MDBModalContent,
@@ -14,11 +12,8 @@ import {
   MDBModalHeader,
   MDBModalTitle,
 } from "mdb-react-ui-kit";
-import React, { Dispatch, SetStateAction, useState } from "react";
+import  { Dispatch, SetStateAction, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { PagePaths } from "../../ReactConstants";
-import isElectron from "is-electron";
-import { uploadDummyApps } from "../../Web3Communication/Web3ReactApi";
 import fx from 'fireworks'
 
 interface LoginModalProps {
@@ -40,8 +35,9 @@ export function LoginModal({
         x: window.outerWidth * Math.random(),
         y: window.outerHeight * Math.random() ,
         colors: ['#cc3333', '#4CAF50', '#81C784', '#FFEB3B', '#2196F3'],
+        particleTimeout: 10000
       })
-       await new Promise(resolve => setTimeout(resolve, 1500))
+       await new Promise(resolve => setTimeout(resolve, 2000))
     }
 
     )

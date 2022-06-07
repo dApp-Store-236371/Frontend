@@ -16,6 +16,7 @@ import { toast } from "react-toastify";
 import {MdNewLabel} from "react-icons/all";
 import { IS_ON_ELECTRON } from "../../../ElectronCommunication/SharedElectronConstants";
 import ElectronMessages from "../../../ElectronCommunication/ElectronMessages";
+import { createMagnetLink } from "../../Shared/utils";
 //import { createMagnetLink } from "../../../electronCommunication";
 
 interface UploadFormProps {
@@ -38,36 +39,9 @@ export default function UploadForm({
     formik.handleChange(e);
   };
 
-  async function createMagnetLink(path: string){
-      let magnetLink = ""
-      
-      if (IS_ON_ELECTRON) {
-        console.log("Creating magnet link")
+  
 
-          const { ipcRenderer } = window.require("electron");
-          console.log("Before ipcRenderer")
-
-          magnetLink = await ipcRenderer
-            .invoke(ElectronMessages.ElectronMessages.CREATE_MAGNET, JSON.stringify({ path: path }))
-            .then((result: any) => {
-              console.log("createMagnet reply:", result);
-              if (!result.success) {
-                console.log("Error creating magnet link");
-                throw new Error(result.errorMsg);
-              }
-
-              return result
-            });
-          return magnetLink
-        
-
-      }
-      else{
-        console.log("Returning empty magnet")
-        return magnetLink
-      }
-
-  }
+  
 
   useEffect(() => {
     fetch('https://api.coinbase.com/v2/exchange-rates?currency=ETH')
@@ -137,9 +111,9 @@ export default function UploadForm({
       });
       console.log("form values: ", values)
       try{
-        let magnet_link = await createMagnetLink(values.appFile);
+        let [magnet_link, sha] = await createMagnetLink(values.appFile);
 
-      console.log("after magnet link created")
+      console.log("after magnet link created: ", magnet_link)
 
       //createTorrent(values.appFile);
       //.then ( (results from electron which include magnet link & SHA) => {
@@ -150,7 +124,7 @@ export default function UploadForm({
         values.company,
         values.img_url,
         values.price,
-        "Placeholder SHA",
+        sha,
           values.category,
       )
         .then(() => {

@@ -134,24 +134,27 @@ ipcMain.handle(ElectronMessages.CREATE_MAGNET, async(event, ...args) => {
 });
 
 ipcMain.handle(ElectronMessages.DOWNLOAD_TORRENT, async(event, ...args) => {
-    console.log("Electron DOWNLOAD TORRENT")
-    console.log(args);
+    console.log("Electron DOWNLOAD TORRENT. args: ", args)
+    const argsObject = JSON.parse(args[0])
+    console.log("download magnet: ", argsObject['magnet']);
+
     const res = { success: false, errorMsg: "" }
 
+    const magnet = argsObject.magnet;
     try {
 
-        if (!args.magnetLink) {
+        if (!magnet) {
             console.log("No magnet link")
             res.success = false
             res.errorMsg = "No magnet link"
             return res
         }
-        downloadMagnetLink(args.magnetLink)
+        downloadMagnetLink(magnet)
 
         res.success = true
         return res;
     } catch (err) {
-        console.log(err)
+        console.log("DEBUG: ", err)
         res.success = false
         res.errorMsg = err
         return res

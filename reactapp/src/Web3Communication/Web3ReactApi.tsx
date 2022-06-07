@@ -41,7 +41,8 @@ export async function getPublishedApps() {
             version: 1,
             publication_date: "1.1.1",
             published: solidityStruct.creator === getCurrAccount(),
-            category: AppCategories.Games
+            category: AppCategories.Games,
+            magnetLink: solidityStruct.magnetLink,
           };
           publishedApps.push(app);
         });
@@ -86,7 +87,8 @@ export async function getOwnedApps() {
             version: 1,
             publication_date: "1.1.1",
             published: solidityStruct.creator === getCurrAccount(),
-            category: AppCategories.Games
+            category: AppCategories.Games,
+            magnetLink: solidityStruct.magnetLink
           };
           ownedApps.push(app);
         });
@@ -196,7 +198,8 @@ export const uploadApp = async (
   sha: string,
   category: string
 ) => {
-  console.log("Uploading App: ", name);
+  console.log("Uploading App: ", name, magnetLink);
+  
 
   let contract = await createContract(
     DAPPSTORE_ABI,
@@ -303,7 +306,8 @@ const fetchDisplayedApps = async (
           version: 1,
           publication_date: "1.1.1",
           published: solidityStruct.creator === getCurrAccount(),
-          category: AppCategories.Games
+          category: AppCategories.Games,
+          magnetLink: solidityStruct.magnetLink,
         };
         appsToDisplay.push(app);
       });

@@ -38,15 +38,31 @@ const announceList = [
 
 ]
 
-async function downloadMagnetLink(magnetLink, downloadPath = "C:\\daapstoreDownloads") {
+function downloadMagnetLink(magnetLink, downloadPath = "C:\\daapstoreDownloads") {
     console.log("B")
     try {
+        const torrentsWithSameMagnet = torrentClient.torrents.filter(t => t.magnetURI === magnetLink)
+        console.log("torrentsWithSameMagnet: ", torrentsWithSameMagnet)
+        if (torrentsWithSameMagnet.length > 0) {
+            console.log("Torrent already exists")
+            if (torrentsWithSameMagnet[0].progress === 1) {
+                console.log("Torrent already downloaded")
+                throw new Error("Torrent already downloaded")
+            } else {
+                console.log("Torrent already downloading")
+                throw new Error("Torrent already downloading")
+            }
+        }
+
+
+
         torrentClient.add(magnetLink, { path: downloadPath }, function(torrent) {
             console.log('Client is downloading:', torrent.name)
             addTorrentEventListeners(torrent)
         })
     } catch (err) {
         console.log("Exception in downloadMagnetLink: ", err)
+        throw err;
     }
     console.log("C")
 
