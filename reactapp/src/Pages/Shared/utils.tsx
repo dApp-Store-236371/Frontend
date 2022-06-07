@@ -3,6 +3,7 @@ import { Dispatch, SetStateAction } from "react";
 import { toast } from "react-toastify";
 import ElectronMessages from "../../ElectronCommunication/ElectronMessages";
 import { IS_ON_ELECTRON } from "../../ElectronCommunication/SharedElectronConstants";
+import { AppRatings } from "../../ReactConstants";
 import AppData from "../AppsPage/AppData";
 
 
@@ -34,7 +35,11 @@ export async function startDownload(appToDownload: AppData, downloadingApps: App
   
         const res = await ipcRenderer.invoke(ElectronMessages.ElectronMessages.DOWNLOAD_TORRENT, JSON.stringify({ magnet: appToDownload.magnetLink }));
         if(!res.success){
-          toast.error(`Error downloading app! ${res.errorMsg}`);
+          toast.update(toastId, {
+            render: `Error downloading ${appToDownload.name}!  ${res.errorMsg}`,
+            type: toast.TYPE.ERROR,
+            autoClose: 5000
+          })
           setDownloadingApps(downloadingApps.filter(app => app.id !== appToDownload.id));
         }
           
@@ -74,3 +79,20 @@ export async function createMagnetLink(path: string){
   }
 }
 
+
+export function ratingEnumToNumber(rating: AppRatings){
+  switch(rating){
+    case AppRatings.One:
+      return 1
+    case AppRatings.Two:
+      return 2
+    case AppRatings.Three:
+      return 3
+    case AppRatings.Four:
+      return 4
+    case AppRatings.Five:
+      return 5
+    default:
+      return 0
+  }
+}

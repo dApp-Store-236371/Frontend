@@ -10,7 +10,9 @@ import {
   DAPPSTORE_CONTRACT_ADDRESS,
 } from "./Contracts/dAppContract";
 import { Dispatch, SetStateAction } from "react";
-import {AppCategories} from "../ReactConstants";
+import {AppCategories, AppRatings} from "../ReactConstants";
+import { bool, boolean } from "yup";
+import { ratingEnumToNumber } from "../Pages/Shared/utils";
 
 export async function getPublishedApps() {
   if (IS_DEBUG) {
@@ -114,21 +116,60 @@ export const getDisplayedApps = async (
   itemsPerPage: number,
   setDisplayedApps: Dispatch<SetStateAction<Array<AppData>>>,
   setNumberOfPages: Dispatch<SetStateAction<number>>,
-  filter?: string,
-  selectedCategory?: string
+  textFilter?: string,
+  selectedCategory?: string,
+  selectedRating?: AppRatings
 ) => {
   //request to fetch apps [(pageNum*itemsPerPage + 1), (pageNum*itemsPerPage + itemsPerPage) )
   let res: getDisplayedAppsObj;
   if (IS_DEBUG) {
-    res = await fetchDummyDisplayedApps(itemsPerPage, pageNum, filter);
+    res = await fetchDummyDisplayedApps(itemsPerPage, pageNum, textFilter);
     setDisplayedApps(res.displayedApps);
     setNumberOfPages(res.pageCount);
   } else {
-    res = await fetchDisplayedApps(itemsPerPage, pageNum, filter, selectedCategory);
-    setDisplayedApps(res.displayedApps);
+    res = await fetchDisplayedApps(itemsPerPage, pageNum, textFilter, selectedCategory);
+
+    let appsToDisplay: AppData[] = [];
+    if( (!selectedCategory || selectedCategory === AppCategories.All) && (!selectedRating || selectedRating === AppRatings.All) && (textFilter === "" || !textFilter)){ 
+      console.log("AAAA", textFilter, selectedCategory, selectedRating);
+      console.log("no filters: ", res.displayedApps)
+      appsToDisplay = res.displayedApps;
+    }
+    else{
+      appsToDisplay = await res.displayedApps.filter( (app) => {
+                        return appSatisfiesFilters(app, textFilter, selectedCategory, selectedRating);
+                    })
+  }
+    console.log("filtered apps: ", appsToDisplay)
+    setDisplayedApps(appsToDisplay);
     setNumberOfPages(res.pageCount);
   }
 };
+
+
+const appSatisfiesFilters = (app: AppData, textFilter?: string, selectedCategory?: string, selectedRating?: AppRatings) => {
+  console.log("appSatisfiesFilters", textFilter, selectedCategory, selectedRating);
+
+  let satisfiesTextFilter: boolean = false
+  let satisfiesCategoryFilter: boolean = false
+  let satisfiesRatingFilter: boolean = false
+
+  if(!textFilter || textFilter === "" || app.name.includes(textFilter)){
+    satisfiesTextFilter = true;
+  }
+  if(!selectedCategory || selectedCategory === AppCategories.All || selectedCategory === app.category){
+    satisfiesCategoryFilter = true;
+  }
+  if(!selectedRating || selectedRating === AppRatings.All || ratingEnumToNumber(selectedRating) <= app.rating){
+    satisfiesRatingFilter = true;
+  }
+
+  return satisfiesTextFilter && satisfiesCategoryFilter && satisfiesRatingFilter;
+
+}
+
+
+
 
 const fetchDummyDisplayedApps = async (
   itemsPerPage: number,

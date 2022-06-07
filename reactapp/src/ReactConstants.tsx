@@ -24,6 +24,15 @@ export const AppCategories = {
   Other: "Other"
 }
 
+export  enum AppRatings  {
+  All= "Any Rating",
+  One= "1+ Stars",
+  Two= "2+ Stars",
+  Three= "3+ Stars",
+  Four= "4+ Stars",
+  Five= "5 Stars",
+}
+
 export const DEFAULT_EMPTY_APP: AppData = {
   id: 0,
   company: `Cool Dev`,
