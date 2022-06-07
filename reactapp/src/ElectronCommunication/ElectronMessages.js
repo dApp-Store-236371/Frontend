@@ -4,7 +4,8 @@
 
 module.exports =  {
     ElectronMessages : {
-        ECHO_MSG: "echo"
+        ECHO_MSG: "echo",
+        CREATE_MAGNET: "createMagnet"
     }
 }
 

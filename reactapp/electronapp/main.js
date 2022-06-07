@@ -1,6 +1,11 @@
 // Modules to control application life and create native browser window
 const { app, BrowserWindow, session } = require("electron");
 const path = require("path");
+app.disableHardwareAcceleration()
+const { dialog } = require('electron');
+const { downloadMagnetLink, seedTorrent } = require('./torrent')
+
+
 
 require("@electron/remote/main").initialize();
 const {
@@ -51,20 +56,26 @@ function createWindow() {
         mainWindow.loadURL(REACT_ADDRESS)
     }
 
-
     // Open the DevTools.
     mainWindow.webContents.openDevTools({ mode: "detach" });
 
-    setInterval(() => {
-        mainWindow.webContents.send("download-progress-update", JSON.stringify({ id: 4, progress: 0.5 }));
 
-    }, 5000);
+    // const path = await getFilePath()
+    // console.log(path)
+    // if (!path || path === "") {
+    //     console.log("No file selected")
+    //     return
+    // }
 
-
+    // const magnetLink = await seedTorrent(path)
+    // downloadMagnetLink(magnetLink)
 }
 
+
+
+
+
 const { ipcMain } = require("electron");
-const { dialog } = require("electron");
 
 ipcMain.on("alert", (event, data) => {
     // here we can process the data
@@ -87,6 +98,45 @@ ipcMain.handle(ElectronMessages.ECHO_MSG, async(event, ...args) => {
     dialog.showErrorBox("error title", "cool async error");
     return args;
 });
+
+ipcMain.handle(ElectronMessages.CREATE_MAGNET, async(event, ...args) => {
+    console.log("Electron CREATE MAGNET")
+    console.log(args);
+
+
+    const path = await dialog.showOpenDialog({ properties: ['openFile'] }).then(function(response) {
+        if (!response.canceled) {
+            // handle fully qualified file name
+            console.log(response.filePaths[0]);
+            return (response.filePaths[0])
+        } else {
+            console.log("no file selected");
+            return ("")
+        }
+    })
+    console.log("path = ", path)
+        // createMagnetLink(path);
+
+    return args;
+});
+
+
+async function getFilePath() {
+    return await dialog.showOpenDialog({ properties: ['openFile'] }).then(function(response) {
+        if (!response.canceled) {
+            // handle fully qualified file name
+            console.log(response.filePaths[0]);
+
+            return (response.filePaths[0])
+        } else {
+            console.log("no file selected");
+            return ("")
+        }
+    })
+}
+
+
+
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
