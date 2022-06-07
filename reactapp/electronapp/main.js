@@ -72,9 +72,6 @@ function createWindow() {
 }
 
 
-
-
-
 const { ipcMain } = require("electron");
 
 ipcMain.on("alert", (event, data) => {
@@ -103,21 +100,62 @@ ipcMain.handle(ElectronMessages.CREATE_MAGNET, async(event, ...args) => {
     console.log("Electron CREATE MAGNET")
     console.log(args);
 
+    try {
 
-    const path = await dialog.showOpenDialog({ properties: ['openFile'] }).then(function(response) {
-        if (!response.canceled) {
-            // handle fully qualified file name
-            console.log(response.filePaths[0]);
-            return (response.filePaths[0])
-        } else {
-            console.log("no file selected");
-            return ("")
+        const res = { success: false, magnet: undefined, sha: undefined, errorMsg: "" }
+        const path = await getFilePath()
+
+        if (!path || path === "") {
+            console.log("No file selected")
+            res.success = false
+            res.errorMsg = "No file selected"
+            return res
         }
-    })
-    console.log("path = ", path)
-        // createMagnetLink(path);
 
-    return args;
+        const magnetLink = await seedTorrent(path)
+        console.log("magnetLink2: " + magnetLink)
+
+        if (!magnetLink || magnetLink === "") {
+            console.log("Failed to create magnet link")
+            res.success = false
+            res.errorMsg = "Failed to seed"
+            return res
+        }
+
+        res.success = true
+        res.magnet = magnetLink
+        res.sha = path
+        console.log("Finished succesffuly getting magnet link")
+        return res;
+    } catch (err) {
+        console.log("Electron CREATE_MAGNET Exception: ", err)
+        return { success: false, magnet: undefined, sha: undefined, errorMsg: err.message }
+    }
+});
+
+ipcMain.handle(ElectronMessages.DOWNLOAD_TORRENT, async(event, ...args) => {
+    console.log("Electron DOWNLOAD TORRENT")
+    console.log(args);
+    const res = { success: false, errorMsg: "" }
+
+    try {
+
+        if (!args.magnetLink) {
+            console.log("No magnet link")
+            res.success = false
+            res.errorMsg = "No magnet link"
+            return res
+        }
+        downloadMagnetLink(args.magnetLink)
+
+        res.success = true
+        return res;
+    } catch (err) {
+        console.log(err)
+        res.success = false
+        res.errorMsg = err
+        return res
+    }
 });
 
 

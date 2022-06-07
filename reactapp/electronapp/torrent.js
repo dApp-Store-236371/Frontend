@@ -52,24 +52,49 @@ async function downloadMagnetLink(magnetLink, downloadPath = "C:\\daapstoreDownl
 
 }
 
+
 async function seedTorrent(torrentPath, name) {
-
-
-
     try {
+        let magnetURI = undefined
+
         const torrent = torrentClient.seed(torrentPath, { name: name, announceList: announceList }, function(torrent) {
             console.log('Client is seeding:', torrent.name)
             console.log('Magnet Link: ', torrent.magnetURI)
+
+
+            console.log("ALL Torrents: ", torrentClient.torrents)
+            const torrentsWithSameInfoHash = torrentClient.torrents.filter(t => t.infoHash === torrent.infoHash)
+            console.log("torrentsWithSameInfoHash: ", torrentsWithSameInfoHash)
+            if (torrentsWithSameInfoHash.length > 0) {
+                console.log("Torrent already exists with magnet link: ", torrentsWithSameInfoHash[0].magnetURI)
+                magnetURI = torrentsWithSameInfoHash[0].magnetURI
+                return
+            } else {
                 // console.log("Trackers: ", torrent.announceList)
-            addTorrentEventListeners(torrent)
+                addTorrentEventListeners(torrent)
+                magnetURI = torrent.magnetURI
+                console.log("Added event Listeners")
+            }
+
+
         })
 
-        while (!torrent.magnetURI) {
+        let timeout_counter = 30
+        while (!magnetURI) {
+
+            if (timeout_counter === 0) {
+                throw new Error("Timeout")
+            }
+
             //sleep in js
             await new Promise(resolve => setTimeout(resolve, 1000));
-        }
 
-        return torrent.magnetURI
+            timeout_counter--
+
+            // console.log("Waiting for magnet URI", torrent.magnetURI, torrent)
+        }
+        // console.log("AAAAAAAAAAAAAAA")
+        return magnetURI
 
     } catch (err) {
         console.log("Exception in seedTorrent: ", err)
