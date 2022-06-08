@@ -20,6 +20,7 @@ export function FeaturedAppsTile(props: FeaturedAppsTileProps){
         console.log("provider changed")
         const updateFeaturedApp = async () => {
             const newFeaturedApp = await getFeaturedApp();
+            
             setFeaturedApp(newFeaturedApp);
 
         }
