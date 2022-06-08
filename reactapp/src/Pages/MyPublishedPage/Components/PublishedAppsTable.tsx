@@ -45,7 +45,7 @@ export function PublishedAppsTable({
         accessor: "price",
       },
       {
-        Header: "Magnet Link",
+        Header: "Magnet 🧲",
         accessor: "magnetLink",
         Cell: (value: any) => (
           <div>

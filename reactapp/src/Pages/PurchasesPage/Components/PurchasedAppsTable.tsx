@@ -14,6 +14,7 @@ import isElectron from "is-electron";
 import { MDBBtn } from "mdb-react-ui-kit";
 import FallbackImg from "../../../Misc/fix-invalid-image-error.png";
 import { startDownload } from "../../Shared/utils";
+import { toast } from "react-toastify";
 interface purchasedAppsTableProps {
   ownedApps: AppData[];
   setSelectedAppData: Dispatch<SetStateAction<AppData>>;
@@ -61,14 +62,30 @@ export function PurchasedAppsTable({
       },
 
       {
-        Header: "",
+        Header: "Description",
         accessor: "description",
         Cell: (value: any) => {
           return value.value;
         },
       },
       {
-        Header: "",
+        Header: "Magnet 🧲",
+        accessor: "magnetLink",
+        Cell: (value: any) => (
+          <div>
+          <MDBBtn
+          size={"sm"}
+          onClick={() => {
+            navigator.clipboard.writeText(value?.value)
+            toast.success("Copied to clipboard! 🎉 ", )
+          }}
+        >
+          Copy To Clipboard
+        </MDBBtn>
+      </div>
+     )},
+      {
+        Header: "📥",
         accessor: "action",
         Cell: (value: any) => (
           <div>
@@ -80,11 +97,7 @@ export function PurchasedAppsTable({
               {isElectron()
                 ? ["Download"]
                 : [
-                    "Download",
-                    <br />,
-                    "Desktop Client",
-                    <br />,
-                    " To Download",
+                    "Get Desktop Client",
                   ]}
             </MDBBtn>
           </div>
