@@ -20,6 +20,7 @@ interface AppsCatalogPageProps {
   currAccount: string;
   downloadingApps: Array<AppData>;
   setDownloadingApps: Dispatch<SetStateAction<Array<AppData>>>;
+  provider: any;
 }
 
 function AppsCatalogPage(props: AppsCatalogPageProps) {
@@ -35,7 +36,7 @@ function AppsCatalogPage(props: AppsCatalogPageProps) {
 
   //Display Dummy apps
   useEffect(() => {
-    getDisplayedApps(0, APPS_PER_PAGE, setDisplayedApps, setNumberOfPages);
+    getDisplayedApps(0, APPS_PER_PAGE, setDisplayedApps, setNumberOfPages, );
   }, [props.currAccount]);
 
   const handlePageClick = (arg: { selected: number }) => {
@@ -66,6 +67,7 @@ function AppsCatalogPage(props: AppsCatalogPageProps) {
           setDisplayedApps={setDisplayedApps}
           toggleShowModal={toggleShowModal}
           setSelectedAppData={setSelectedAppData}
+          provider={props.provider}
         />
       </div>
       <div id="pagination-div">

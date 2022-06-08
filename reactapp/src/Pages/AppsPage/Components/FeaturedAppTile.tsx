@@ -9,14 +9,15 @@ import no_image_alt from "../../../Misc/app_no_image_alt.jpg";
 interface FeaturedAppsTileProps{
     toggleShowModal: any;
     setSelectedAppData: any;
+    provider: any
 }
 
 export function FeaturedAppsTile(props: FeaturedAppsTileProps){
 
-    const [featuredApp, setFeaturedApp] = useState<AppData>(DEFAULT_EMPTY_APP);
+    const [featuredApp, setFeaturedApp] = useState<AppData | undefined >(undefined);
     
     useEffect( () => {
-
+        console.log("provider changed")
         const updateFeaturedApp = async () => {
             const newFeaturedApp = await getFeaturedApp();
             setFeaturedApp(newFeaturedApp);
@@ -24,12 +25,16 @@ export function FeaturedAppsTile(props: FeaturedAppsTileProps){
         }
 
         updateFeaturedApp();
-    }, [])
+    }, [props.provider ])
     
     const handleShowDetails = () => {
         props.setSelectedAppData(featuredApp);
         props.toggleShowModal();
       };
+
+    if(!featuredApp){
+        return null;
+    }
 
     return (
         <>

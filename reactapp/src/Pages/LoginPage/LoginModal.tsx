@@ -12,17 +12,24 @@ import {
   MDBModalHeader,
   MDBModalTitle,
 } from "mdb-react-ui-kit";
-import  { Dispatch, SetStateAction, useState } from "react";
+import  { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import fx from 'fireworks'
 
 interface LoginModalProps {
   setIsWalletConnected: Dispatch<SetStateAction<boolean>>;
   setCurrAccount: Dispatch<SetStateAction<string>>;
+  isWalletConnected: boolean;
+  provider: any;
+  setProvider: Dispatch<SetStateAction<any>>;
+  
 }
 export function LoginModal({
   setIsWalletConnected,
   setCurrAccount,
+  isWalletConnected,
+  provider,
+  setProvider
 }: LoginModalProps) {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState<boolean>(true);
@@ -31,17 +38,23 @@ export function LoginModal({
     let range = (n: number) => [...new Array(n)]
 
     range(20).map( async () =>{
+       await new Promise(resolve => setTimeout(resolve, Math.random() *  2000))
+
       fx({
         x: window.outerWidth * Math.random(),
         y: window.outerHeight * Math.random() ,
         colors: ['#cc3333', '#4CAF50', '#81C784', '#FFEB3B', '#2196F3'],
-        particleTimeout: 10000
+        particleTimeout: 50000
       })
-       await new Promise(resolve => setTimeout(resolve, 2000))
     }
 
     )
   }
+
+  useEffect(() => {
+    console.log("LoginModal useEffect. waletConnectedChanged");
+    setShowModal(!isWalletConnected || !provider)
+  }, [isWalletConnected]);
 
   return (
     <>
@@ -63,11 +76,13 @@ export function LoginModal({
                   setShowModal(false);
                   connectWalletWithModal()
                     .then(() => {
+                      const provider = web3.eth.currentProvider
+                      setProvider(provider)
                       setIsWalletConnected(true);
                       web3.eth.getAccounts().then((accounts) => {
                         console.log("Accounts: ", accounts);
                         setCurrAccount(accounts[0]);
-                        displayFireworks()
+                        displayFireworks()                        
                       });
                     })
                     .catch((error) => {

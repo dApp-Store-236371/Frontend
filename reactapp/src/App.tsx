@@ -22,6 +22,7 @@ import { LoginModal } from "./Pages/LoginPage/LoginModal";
 import Web3 from "web3";
 import { Web3TestPage } from "./Web3Communication/Web3TestPage";
 import { uploadDummyApps } from "./Web3Communication/Web3ReactApi";
+import { web3 } from "./Web3Communication/Web3Init";
 toast.configure();
 
 console.log("Is running on Electron? " + isElectron());
@@ -59,9 +60,27 @@ function App() {
   const [userId, setUserId] = useState<string>("");
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [currAccount, setCurrAccount] = useState<string>("");
-
+  const [provider, setProvider] = useState<any>(undefined);
   const [downloadingApps, setDownloadingApps] = useState<AppData[]>([]);
   
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // console.log('This will run every second!');
+      web3.eth.getAccounts().then((accounts) => {
+        setIsWalletConnected(accounts.length > 0);
+        console.log("Accounts: ", accounts);
+        setCurrAccount(accounts[0]);
+      })    
+      .catch((error) => {
+        console.log(error);
+      });
+      }, 3000)
+    
+
+
+    return () => clearInterval(interval);
+  }, []);
 
   if(isElectron()){
     const { ipcRenderer } = window.require("electron");
@@ -94,6 +113,9 @@ function App() {
         <LoginModal
           setIsWalletConnected={setIsWalletConnected}
           setCurrAccount={setCurrAccount}
+          isWalletConnected={isWalletConnected}
+          provider={provider}
+          setProvider={setProvider}
         />
         <button
           onClick={() => {
@@ -122,6 +144,8 @@ function App() {
                 currAccount={currAccount}
                 downloadingApps={downloadingApps}
                 setDownloadingApps={setDownloadingApps}
+                provider={provider}
+
               />
             }
           />

@@ -364,14 +364,28 @@ const fetchDisplayedApps = async (
   return res;
 };
 
-export async function getFeaturedApp() : Promise<AppData> {
+export async function getFeaturedApp() : Promise<AppData|undefined> {
     //TODO: fetch number of apps, and then an app randomly.
-  
-    //Meanwhile:
-    const numOfApps = DUMMY_APPS.length;
-    const featuredAppIndex =Math.floor(Math.random() * numOfApps-1);
-    return DUMMY_APPS[featuredAppIndex];
+    try{
+    console.log("Fetching features app")
 
+      //dummy call to get length quick and very very dirty
+      const totalNumOfApps = 10 //TODO: CHANGE THIS
+    const featuredAppRandomness: number =  Math.ceil((Math.random() * 100000)) % totalNumOfApps;//TODO: Change
+    const featuresApp = (await fetchDisplayedApps(1, featuredAppRandomness, undefined, undefined)).displayedApps[0];
+    console.log("Featured app: ", featuresApp);
+    return featuresApp;
+
+  
+    // //Meanwhile:
+    // const numOfApps = DUMMY_APPS.length;
+    // const featuredAppIndex =Math.floor(Math.random() * numOfApps-1);
+    // return DUMMY_APPS[featuredAppIndex];
+    }
+    catch(err){
+        console.log("Error fetching featured app: ", err);
+        return undefined;
+    }
 
 }
 
