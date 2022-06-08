@@ -23,6 +23,7 @@ import Web3 from "web3";
 import { Web3TestPage } from "./Web3Communication/Web3TestPage";
 import { uploadDummyApps } from "./Web3Communication/Web3ReactApi";
 import { web3 } from "./Web3Communication/Web3Init";
+import { SettingsModal } from "./Pages/Shared/SettingsModal";
 toast.configure();
 
 console.log("Is running on Electron? " + isElectron());
@@ -62,6 +63,8 @@ function App() {
   const [currAccount, setCurrAccount] = useState<string>("");
   const [provider, setProvider] = useState<any>(undefined);
   const [downloadingApps, setDownloadingApps] = useState<AppData[]>([]);
+  const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
+  const [defaultPath, setDefaultPath] = useState<string>("C:\\daapstoreDownloads");
   
 
   useEffect(() => {
@@ -117,6 +120,13 @@ function App() {
           provider={provider}
           setProvider={setProvider}
         />
+        <SettingsModal
+              setDefaultPath={setDefaultPath}
+              defaultPath={defaultPath}
+              currAccount={currAccount}
+              showModal={showSettingsModal}
+              setShowModal={setShowSettingsModal}
+        />
         <button
           onClick={() => {
             uploadDummyApps(30);
@@ -129,6 +139,7 @@ function App() {
           setNumberOfPages={setNumberOfPages}
           setDisplayedApps={setDisplayedApps}
           currAccount={currAccount}
+          setShowSettingsModal={setShowSettingsModal}
         />
         <Routes>
           <Route
@@ -145,6 +156,7 @@ function App() {
                 downloadingApps={downloadingApps}
                 setDownloadingApps={setDownloadingApps}
                 provider={provider}
+                downloadPath={defaultPath}
 
               />
             }
@@ -161,6 +173,7 @@ function App() {
                   setOwnedApps={setOwnedApps}
                   downloadingApps={downloadingApps}
                   setDownloadingApps={setDownloadingApps}
+                  downloadPath={defaultPath}
                 />
               ) : (
                 <LoginPage />

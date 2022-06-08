@@ -18,6 +18,7 @@ interface PurchasedProps {
   setIsLoading: Dispatch<SetStateAction<boolean>>;
   downloadingApps: AppData[];
   setDownloadingApps: Dispatch<SetStateAction<AppData[]>>;
+  downloadPath: string;
 }
 
 function PurchasesPage({
@@ -28,6 +29,7 @@ function PurchasesPage({
   setIsLoading,
   downloadingApps,
   setDownloadingApps,
+  downloadPath,
 }: PurchasedProps) {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [selectedAppData, setSelectedAppData] =
@@ -51,6 +53,7 @@ function PurchasesPage({
         ownedApps={ownedApps}
         appsToDownload={downloadingApps}
         setAppsToDownload={setDownloadingApps}
+        downloadPath={downloadPath}
       />
       ;
     </>

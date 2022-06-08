@@ -21,6 +21,7 @@ interface AppsCatalogPageProps {
   downloadingApps: Array<AppData>;
   setDownloadingApps: Dispatch<SetStateAction<Array<AppData>>>;
   provider: any;
+  downloadPath: string;
 }
 
 function AppsCatalogPage(props: AppsCatalogPageProps) {
@@ -60,6 +61,7 @@ function AppsCatalogPage(props: AppsCatalogPageProps) {
         setIsLoading={props.setIsLoading}
         downloadingApps={props.downloadingApps}
         setDownloadingApps={props.setDownloadingApps}
+        downloadPath={props.downloadPath}
       />
       <div id="apps-catalog">
         <AppsCatalog

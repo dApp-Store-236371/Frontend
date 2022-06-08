@@ -141,6 +141,8 @@ ipcMain.handle(ElectronMessages.DOWNLOAD_TORRENT, async(event, ...args) => {
     const res = { success: false, errorMsg: "" }
 
     const magnet = argsObject.magnet;
+    const path = argsObject.path
+    console.log("Args object path: ", path)
     try {
 
         if (!magnet) {
@@ -149,7 +151,7 @@ ipcMain.handle(ElectronMessages.DOWNLOAD_TORRENT, async(event, ...args) => {
             res.errorMsg = "No magnet link"
             return res
         }
-        downloadMagnetLink(magnet)
+        downloadMagnetLink(magnet, path)
 
         res.success = true
         return res;

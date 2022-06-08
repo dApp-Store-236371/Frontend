@@ -15,6 +15,8 @@ import {
   getDisplayedApps,
   getDisplayedAppsObj,
 } from "../../Web3Communication/Web3ReactApi";
+import settingsImg from '../../Misc/settings.png'
+
 import {
   MDBBtn,
   MDBDropdown,
@@ -30,18 +32,19 @@ interface NavigationBarProps {
   setDisplayedApps: Dispatch<SetStateAction<Array<AppData>>>;
   setNumberOfPages: Dispatch<SetStateAction<number>>;
   currAccount: string;
+  setShowSettingsModal: Dispatch<SetStateAction<boolean>>;
 }
 
 export default function NavigationBar({
   setNumberOfPages,
   setDisplayedApps,
   currAccount,
+  setShowSettingsModal
 }: NavigationBarProps) {
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>(AppCategories.All)
   const [selectedRating, setSelectedRating] = useState<AppRatings>(AppRatings.All)
-
 
   const handleSearchSubmit = async (event: FormEvent) => {
     event.preventDefault(); //Otherwise refreshes the page
@@ -141,7 +144,7 @@ export default function NavigationBar({
             }} defaultValue={AppRatings.All}>
             <option  value="" >{AppRatings.All} </option>
             {Object.values(AppRatings).filter(rating => rating !== AppRatings.All).map( (rating) => (
-                <option id={rating} value={rating}>{rating}</option>
+                <option key={rating} id={rating} value={rating}>{rating}</option>
             ) )}
             </select>
 
@@ -169,13 +172,29 @@ export default function NavigationBar({
     } else {
     }
   };
-
   return (
     <>
       <nav className="navbar sticky-top navbar-light bg-light">
         <div className="container-fluid">
           <a className="navbar-brand">dAppstore</a>
           {/* <h6 id="curr-account-text"> {`Account: ${currAccount}`}</h6> */}
+          <button 
+          
+            style={
+              {
+                'alignSelf': "left",
+                'marginLeft': "0",
+                'marginRight': "auto",
+                'border': "none",
+              }
+            }
+          ><img src={settingsImg} alt="Settings" onClick={() => setShowSettingsModal(true)} 
+          style={{
+            'maxHeight': '30px',
+            'maxWidth': '30px',
+            
+          }}/></button>
+
           {renderSearchbar()}
         </div>
       </nav>

@@ -7,7 +7,7 @@ import { AppRatings } from "../../ReactConstants";
 import AppData from "../AppsPage/AppData";
 
 
-export async function startDownload(appToDownload: AppData, downloadingApps: AppData[], setDownloadingApps: Dispatch<SetStateAction<AppData[]>>){
+export async function startDownload(appToDownload: AppData, downloadingApps: AppData[], setDownloadingApps: Dispatch<SetStateAction<AppData[]>>, downloadPath: string){
     console.log("App to download is: ", appToDownload)
     console.log("Downloading apps: ", downloadingApps)
     if (isElectron()) {
@@ -33,7 +33,7 @@ export async function startDownload(appToDownload: AppData, downloadingApps: App
         const { ipcRenderer } = window.require("electron");
         console.log("Before ipcRenderer")
   
-        const res = await ipcRenderer.invoke(ElectronMessages.ElectronMessages.DOWNLOAD_TORRENT, JSON.stringify({ magnet: appToDownload.magnetLink }));
+        const res = await ipcRenderer.invoke(ElectronMessages.ElectronMessages.DOWNLOAD_TORRENT, JSON.stringify({ magnet: appToDownload.magnetLink, path: downloadPath }));
         if(!res.success){
           toast.update(toastId, {
             render: `Error downloading ${appToDownload.name}!  ${res.errorMsg}`,

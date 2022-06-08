@@ -21,6 +21,7 @@ interface purchasedAppsTableProps {
   setShowModal: Dispatch<SetStateAction<boolean>>;
   appsToDownload: AppData[];
   setAppsToDownload: Dispatch<SetStateAction<AppData[]>>;
+  downloadPath: string;
 }
 
 
@@ -31,6 +32,7 @@ export function PurchasedAppsTable({
   setShowModal,
   appsToDownload,
   setAppsToDownload,
+  downloadPath,
 }: purchasedAppsTableProps) {
 
 
@@ -136,7 +138,7 @@ export function PurchasedAppsTable({
       console.log("Row data to download: ", rowData);
       setSelectedAppData(rowData);
       // setShowModal(true);
-      await startDownload(rowData, appsToDownload, setAppsToDownload)
+      await startDownload(rowData, appsToDownload, setAppsToDownload, downloadPath)
     } else {
       window.open("https://easyupload.io/ihr4mn");
     }

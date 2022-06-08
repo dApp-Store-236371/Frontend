@@ -30,6 +30,7 @@ interface AppDetailsModalProps {
   setIsLoading: Dispatch<SetStateAction<boolean>>;
   downloadingApps: appData[];
   setDownloadingApps: Dispatch<SetStateAction<appData[]>>;
+  downloadPath: string;
 }
 
 export default function AppDetailsModal({
@@ -41,6 +42,7 @@ export default function AppDetailsModal({
   setIsLoading,
   downloadingApps,
   setDownloadingApps,
+  downloadPath
 }: AppDetailsModalProps) {
   const [rating, setRating] = useState<number>(0); // initial rating value
   const [ownedState, setOwnedStateState] = useState<boolean>(false);
@@ -77,7 +79,7 @@ export default function AppDetailsModal({
 
     if (ownedState) {
       //Download
-      startDownload(app, downloadingApps, setDownloadingApps);
+      startDownload(app, downloadingApps, setDownloadingApps, downloadPath);
     } else {
       setIsLoading(true);
       let purchasingToastId = toast(`Purchasing ${app.name}...`, {
