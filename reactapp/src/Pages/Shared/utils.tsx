@@ -96,3 +96,30 @@ export function ratingEnumToNumber(rating: AppRatings){
       return 0
   }
 }
+
+export async function requestSeed(app: AppData){
+  if (IS_ON_ELECTRON) {
+    console.log("Requesting seed")
+
+      const { ipcRenderer } = window.require("electron");
+      console.log("Before ipcRenderer")
+
+      let electronRes = await ipcRenderer
+        .invoke(ElectronMessages.ElectronMessages.SEED_TORRENT , JSON.stringify({ magnet: app.magnetLink, name: app.name,sha: app.SHA }))
+        .then((result: any) => {
+          console.log("requestSeed reply:", result);
+          if (!result.success) {
+            console.log("Error requesting seed");
+            throw new Error(result.errorMsg);
+          }
+          return result
+        });
+      return
+    
+
+  }
+  else{
+    console.log("Returning empty magnet")
+    return ""
+  }
+}

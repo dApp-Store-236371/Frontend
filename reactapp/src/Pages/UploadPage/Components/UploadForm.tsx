@@ -9,13 +9,9 @@ import {AppCategories, APPS_PER_PAGE, MAX_DESCRIPTION_LENGTH} from "../../../Rea
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import "../../../CSS/appImage.css";
-import AppData from "../../AppsPage/AppData";
-import {getDisplayedApps, uploadApp} from "../../../Web3Communication/Web3ReactApi";
+import { uploadApp} from "../../../Web3Communication/Web3ReactApi";
 import { toast } from "react-toastify";
 //import { createMagnetLink } from "../../../../electronapp/main";
-import {MdNewLabel} from "react-icons/all";
-import { IS_ON_ELECTRON } from "../../../ElectronCommunication/SharedElectronConstants";
-import ElectronMessages from "../../../ElectronCommunication/ElectronMessages";
 import { createMagnetLink } from "../../Shared/utils";
 //import { createMagnetLink } from "../../../electronCommunication";
 

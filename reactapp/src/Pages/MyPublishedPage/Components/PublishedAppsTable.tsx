@@ -14,6 +14,7 @@ import Button from "react";
 import isElectron from "is-electron";
 import { MDBBtn } from "mdb-react-ui-kit";
 import { toast } from "react-toastify";
+import { requestSeed } from "../../Shared/utils";
 interface PublishedAppsTableProps {
   publishedApps: AppData[];
   setSelectedAppData: Dispatch<SetStateAction<AppData>>;
@@ -58,6 +59,23 @@ export function PublishedAppsTable({
         >
           Copy To Clipboard
         </MDBBtn>
+        {isElectron() && (
+        <MDBBtn
+          size={"sm"}
+          onClick={async () => {
+    
+              requestSeed(value.cell.row.original)
+              .then(() => {
+                toast.info("Seeding... ", )
+              })
+              .catch((e) => {
+                toast.error("Seeding failed! " + e)
+              })
+
+          }}
+        >
+          Seed
+        </MDBBtn>)}
       </div>
      )},
       {

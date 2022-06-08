@@ -68,6 +68,11 @@ function downloadMagnetLink(magnetLink, downloadPath = "C:\\daapstoreDownloads")
 
 }
 
+function isSeedingOrDownloadingMagnetLink(magnetLink) {
+    const torrentsWithSameMagnet = torrentClient.torrents.filter(t => t.magnetURI === magnetLink)
+    console.log("torrentsWithSameMagnet: ", torrentsWithSameMagnet, torrentsWithSameMagnet.length > 0)
+    return torrentsWithSameMagnet.length > 0
+}
 
 async function seedTorrent(torrentPath, name) {
     try {
@@ -150,5 +155,6 @@ async function addTorrentEventListeners(torrent) {
 
 module.exports = {
     downloadMagnetLink,
-    seedTorrent
+    seedTorrent,
+    isSeedingOrDownloadingMagnetLink
 }

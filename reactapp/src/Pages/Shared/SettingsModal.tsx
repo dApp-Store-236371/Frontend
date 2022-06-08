@@ -33,11 +33,13 @@ export function SettingsModal(props: SettingsModal){
 
                 <div className="form-group" >
                     <label htmlFor="defaultPath"  >Default Path</label>
-                    <input type="text" className="form-control" id="defaultPath" aria-describedby="defaultPathHelp" placeholder="Enter default path" value={props.defaultPath} onChange={(e) => props.setDefaultPath(e.target.value)} />
+                    <input type="text" className="form-control" id="defaultPath" aria-describedby="defaultPathHelp" 
+                    placeholder="Enter default path" value={props.defaultPath} onChange={(e) => props.setDefaultPath(e.target.value)} />
                     <small id="defaultPathHelp" className="form-text text-muted">
                         This is the default path to which apps will be downloaded and from which they will be seeded on startup.
                     </small>
                 </div>
+
 
       
             </MDBModalBody>

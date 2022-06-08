@@ -3,7 +3,8 @@ const { app, BrowserWindow, session } = require("electron");
 const path = require("path");
 app.disableHardwareAcceleration()
 const { dialog } = require('electron');
-const { downloadMagnetLink, seedTorrent } = require('./torrent')
+const { downloadMagnetLink, seedTorrent, isSeedingOrDownloadingMagnetLink } = require('./torrent')
+const crypto = require('crypto');
 
 
 
@@ -164,6 +165,67 @@ ipcMain.handle(ElectronMessages.DOWNLOAD_TORRENT, async(event, ...args) => {
 });
 
 
+ipcMain.handle(ElectronMessages.SEED_TORRENT, async(event, ...args) => {
+    console.log("Electron CREATE MAGNET")
+    console.log(args);
+
+    try {
+
+        console.log("Electron DOWNLOAD TORRENT. args: ", args)
+        const argsObject = JSON.parse(args[0])
+        console.log("seed torrent from magnet: ", argsObject['magnet']);
+
+        const res = { success: false, errorMsg: "" }
+
+        const magnetLink = argsObject.magnet;
+        const name = argsObject.name;
+        const expectedSha = argsObject.sha;
+
+        if (!magnetLink || magnetLink === "") {
+            console.log("Empty Magnet Link")
+            res.success = false
+            res.errorMsg = "Failed to seed. Empty magnet link"
+            return res
+        }
+        // console.log("CCCC", isSeedingOrDownloadingMagnetLink(magnetLink))
+
+        if (isSeedingOrDownloadingMagnetLink(magnetLink)) {
+            console.log("Already seeding magnet link")
+            res.success = true
+            return res
+        }
+
+
+
+        const path = await getFilePath()
+
+        if (!path || path === "") {
+            console.log("No file selected")
+            res.success = false
+            res.errorMsg = "No file selected"
+            return res
+        }
+
+        if (expectedSha !== await getSHA256(path)) {
+            console.log("File has been modified")
+            res.success = false
+            res.errorMsg = "Not same file (Different SHA256)"
+            return res
+        }
+
+        await seedTorrent(path, name)
+        console.log("magnetLink: " + magnetLink)
+
+
+        res.success = true
+        console.log("Finished succesffuly seeding provided magnet link")
+        return res;
+    } catch (err) {
+        console.log("Electron SEED_MAGNET Exception: ", err)
+        return { success: false, errorMsg: err.message }
+    }
+});
+
 async function getFilePath() {
     return await dialog.showOpenDialog({ properties: ['openFile'] }).then(function(response) {
         if (!response.canceled) {
@@ -176,6 +238,16 @@ async function getFilePath() {
             return ("")
         }
     })
+}
+
+async function getSHA256(filePath) {
+    console.log("getting sha256")
+    const fileBuffer = fs.readFileSync(filePath)
+    const hashSum = crypto.createHash('sha256');
+    hashSum.update(fileBuffer);
+    const sha256 = hashSum.digest('hex');
+    console.log("sha256: ", sha256)
+    return sha256
 }
 
 
