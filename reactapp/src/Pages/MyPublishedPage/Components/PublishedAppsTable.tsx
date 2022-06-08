@@ -13,6 +13,7 @@ import { GlobalFilter } from "./GlobalFilter";
 import Button from "react";
 import isElectron from "is-electron";
 import { MDBBtn } from "mdb-react-ui-kit";
+import { toast } from "react-toastify";
 interface PublishedAppsTableProps {
   publishedApps: AppData[];
   setSelectedAppData: Dispatch<SetStateAction<AppData>>;
@@ -44,16 +45,21 @@ export function PublishedAppsTable({
         accessor: "price",
       },
       {
-        Header: "Publication Date",
-        accessor: "publication_date",
-        sortType: (a: any, b: any) => {
-          let a1 = new Date(a.original.publication_date);
-          let b1 = new Date(b.original.publication_date);
-          if (a1 < b1) return 1;
-          else if (a1 > b1) return -1;
-          else return 0;
-        },
-      },
+        Header: "Magnet Link",
+        accessor: "magnetLink",
+        Cell: (value: any) => (
+          <div>
+          <MDBBtn
+          size={"sm"}
+          onClick={() => {
+            navigator.clipboard.writeText(value?.value)
+            toast.success("Copied to clipboard! 🎉 ", )
+          }}
+        >
+          Copy To Clipboard
+        </MDBBtn>
+      </div>
+     )},
       {
         Header: "",
         accessor: "action",
