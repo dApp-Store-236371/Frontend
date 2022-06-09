@@ -26,6 +26,9 @@ export function PublishedAppsTable({
   setSelectedAppData,
   setShowModal,
 }: PublishedAppsTableProps) {
+
+  console.log("RR", publishedApps);
+
   const columns = useMemo(
     () => [
       {
@@ -56,17 +59,23 @@ export function PublishedAppsTable({
             navigator.clipboard.writeText(value?.value)
             toast.success("Copied to clipboard! 🎉 ", )
           }}
+          style={{
+            'backgroundColor': "#00bcd4",
+            'color': "white",
+            'margin': "1px",
+          }}
         >
-          Copy To Clipboard
+          📋
         </MDBBtn>
         {isElectron() && (
         <MDBBtn
           size={"sm"}
           onClick={async () => {
-    
+              console.log("TT: ", value?.cell.row);
               requestSeed(value.cell.row.original)
-              .then(() => {
-                toast.info("Seeding... ", )
+              .then((res) => {
+                
+                toast.info("Seeding... " + res.errorMsg, )
               })
               .catch((e) => {
                 toast.error("Seeding failed! " + e)

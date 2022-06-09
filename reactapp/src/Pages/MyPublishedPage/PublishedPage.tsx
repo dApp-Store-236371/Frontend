@@ -3,7 +3,6 @@ import { IS_ON_ELECTRON } from "../../ElectronCommunication/SharedElectronConsta
 import { PublishedAppsTable } from "./Components/PublishedAppsTable";
 import AppData from "../AppsPage/AppData";
 import {
-  getOwnedApps,
   getPublishedApps,
 } from "../../Web3Communication/Web3ReactApi";
 import "../../CSS/PublishedPage.css";
@@ -30,7 +29,9 @@ function PublishedPage({
 }: PublishedProps) {
   useEffect(() => {
     let foo = async () => {
-      setPublishedApps(await getPublishedApps());
+      const newPublishedApps = await getPublishedApps()
+      console.log('WW: newPublishedApps', newPublishedApps)
+      setPublishedApps(newPublishedApps);
     };
     foo();
   }, [userId]);

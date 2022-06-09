@@ -105,6 +105,7 @@ ipcMain.handle(ElectronMessages.CREATE_MAGNET, async(event, ...args) => {
 
         const res = { success: false, magnet: undefined, sha: undefined, errorMsg: "" }
         const path = await getFilePath()
+        res.sha = await getSHA256(path)
 
         if (!path || path === "") {
             console.log("No file selected")
@@ -125,7 +126,7 @@ ipcMain.handle(ElectronMessages.CREATE_MAGNET, async(event, ...args) => {
 
         res.success = true
         res.magnet = magnetLink
-        res.sha = path
+
         console.log("Finished succesffuly getting magnet link")
         return res;
     } catch (err) {
@@ -166,12 +167,12 @@ ipcMain.handle(ElectronMessages.DOWNLOAD_TORRENT, async(event, ...args) => {
 
 
 ipcMain.handle(ElectronMessages.SEED_TORRENT, async(event, ...args) => {
-    console.log("Electron CREATE MAGNET")
+    console.log("Electron SEED FROM  MAGNET")
     console.log(args);
 
     try {
 
-        console.log("Electron DOWNLOAD TORRENT. args: ", args)
+        console.log("Electron SEED TORRENT FROM MAGNET. args: ", args)
         const argsObject = JSON.parse(args[0])
         console.log("seed torrent from magnet: ", argsObject['magnet']);
 
@@ -192,6 +193,7 @@ ipcMain.handle(ElectronMessages.SEED_TORRENT, async(event, ...args) => {
         if (isSeedingOrDownloadingMagnetLink(magnetLink)) {
             console.log("Already seeding magnet link")
             res.success = true
+            res.errorMsg = "Already seeding!"
             return res
         }
 
@@ -205,7 +207,7 @@ ipcMain.handle(ElectronMessages.SEED_TORRENT, async(event, ...args) => {
             res.errorMsg = "No file selected"
             return res
         }
-
+        console.log("expxectedSha: ", expectedSha)
         if (expectedSha !== await getSHA256(path)) {
             console.log("File has been modified")
             res.success = false
@@ -249,6 +251,11 @@ async function getSHA256(filePath) {
     console.log("sha256: ", sha256)
     return sha256
 }
+
+// const createHashFromFile = filePath => new Promise(resolve => {
+//     const hash = crypto.createHash('sha1');
+//     fs.createReadStream(filePath).on('data', data => hash.update(data)).on('end', () => resolve(hash.digest('hex')));
+//   });
 
 
 

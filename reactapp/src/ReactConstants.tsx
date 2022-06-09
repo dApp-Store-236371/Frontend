@@ -42,7 +42,7 @@ export const DEFAULT_EMPTY_APP: AppData = {
   name: `Dummy App`,
   publication_date: "1.5.2022",
   rating: 5,
-  SHA: "256da46546fd",
+  SHA: ["256da46546fd"],
   version: 1.0,
   owned: true,
   myRating: 4,

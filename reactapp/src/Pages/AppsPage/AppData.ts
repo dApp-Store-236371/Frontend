@@ -5,7 +5,7 @@ interface AppData {
   rating: number;
   description: string;
   img_url: string;
-  SHA: string;
+  SHA: string[];
   version: number;
   publication_date: string;
   company: string;

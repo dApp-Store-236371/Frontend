@@ -7,7 +7,6 @@ import { DEFAULT_EMPTY_APP } from "../../ReactConstants";
 import { DownloadAppModal } from "./Components/DownloadAppModal";
 import {
   getOwnedApps,
-  getPublishedApps,
 } from "../../Web3Communication/Web3ReactApi";
 
 interface PurchasedProps {

@@ -99,13 +99,13 @@ export function ratingEnumToNumber(rating: AppRatings){
 
 export async function requestSeed(app: AppData){
   if (IS_ON_ELECTRON) {
-    console.log("Requesting seed")
+    console.log("Requesting seed, ", app, app.SHA)
 
       const { ipcRenderer } = window.require("electron");
       console.log("Before ipcRenderer")
 
       let electronRes = await ipcRenderer
-        .invoke(ElectronMessages.ElectronMessages.SEED_TORRENT , JSON.stringify({ magnet: app.magnetLink, name: app.name,sha: app.SHA }))
+        .invoke(ElectronMessages.ElectronMessages.SEED_TORRENT , JSON.stringify({ magnet: app.magnetLink, name: app.name, sha: app.SHA.slice(-1)[0]  }))
         .then((result: any) => {
           console.log("requestSeed reply:", result);
           if (!result.success) {
@@ -114,12 +114,12 @@ export async function requestSeed(app: AppData){
           }
           return result
         });
-      return
+      return electronRes
     
 
   }
   else{
     console.log("Returning empty magnet")
-    return ""
+    return {success:false, errorMsg: "Use Desktop App"}
   }
 }

@@ -48,8 +48,8 @@ export async function getPublishedApps() {
           };
           publishedApps.push(app);
         });
-
-        return res;
+        console.log("getpublished apps res:  ", publishedApps);
+        return publishedApps;
       })
       .catch((error: any) => {
         console.log("ERROR in getContractValue", error);
