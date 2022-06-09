@@ -1,0 +1,11 @@
+{
+  "name": "reactapp",
+  "version": "0.1.0",
+  "homepage": "./reactapp",
+  "private": true,
+  "author": {
+    "name": "Carmel Hecht",
+    "email": "hechtcarmel@campus.technion.ac.il",
+    "url": "http://barnyrubble.tumblr.com/"
+  }
+}
