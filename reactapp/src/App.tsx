@@ -73,7 +73,18 @@ function App() {
   //refresh torrent data
   async function refreshActiveTorrentData(){
     if(isElectron()) {
-      const activeTorrentsData: TorrentData[] = await getActiveTorrentData();
+      let activeTorrentsData: TorrentData[] = await getActiveTorrentData();
+      activeTorrentsData = activeTorrentsData.map(torrentData => {
+        const appData: AppData|undefined = ownedApps.find(app => app.magnetLink === torrentData.magnet);
+        if(appData !== undefined){
+          console.log("Found app data for torrent: " + torrentData.magnet);
+          torrentData.appName = appData.name;
+          torrentData.appId = appData.id;
+        }
+        return torrentData;
+      })
+
+      
       setActiveTorrents(activeTorrentsData);
       // const newOwnedApps = ownedApps.map(app => {
       //   const newApp = app;

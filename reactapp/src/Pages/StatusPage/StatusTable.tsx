@@ -27,8 +27,12 @@ export function StatusTable(props: StatusTableProps)
 
   const columns = useMemo(
     () => [
+        {
+            Header: "App",
+            accessor: "appName",
+        },
       {
-        Header: "Name",
+        Header: "File",
         accessor: "name",
       },
 

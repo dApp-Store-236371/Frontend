@@ -173,6 +173,8 @@ export interface TorrentData {
   path?: string,
   isActive?: boolean,
   peersNum?: number,
+  appName?: string,
+  appId?: number,
 }
 
 // export type AppDataWithTorrent = AppData & TorrentData;
