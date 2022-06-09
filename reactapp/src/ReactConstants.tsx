@@ -8,6 +8,7 @@ export const PagePaths = {
   NotFoundPagePath: "*",
   MyPublishedPagePath: "/published",
   LoginPagePath: "/login",
+  StatusPagePath: "/status",
 };
 
 export const APPS_PER_PAGE: number = 16;

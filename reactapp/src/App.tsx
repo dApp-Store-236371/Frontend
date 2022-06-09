@@ -24,6 +24,7 @@ import { Web3TestPage } from "./Web3Communication/Web3TestPage";
 import { uploadDummyApps } from "./Web3Communication/Web3ReactApi";
 import { web3 } from "./Web3Communication/Web3Init";
 import { SettingsModal } from "./Pages/Shared/SettingsModal";
+import { StatusPage } from "./Pages/StatusPage/StatusPage";
 toast.configure();
 
 console.log("Is running on Electron? " + isElectron());
@@ -210,6 +211,7 @@ function App() {
               />
             }
           />
+          <Route path={PagePaths.StatusPagePath} element={<StatusPage />} />
         </Routes>
         {/*Prevents footer to hide content */}
         <div
