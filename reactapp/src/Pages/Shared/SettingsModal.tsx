@@ -38,6 +38,7 @@ export function SettingsModal(props: SettingsModal){
                     <small id="defaultPathHelp" className="form-text text-muted">
                         This is the default path to which apps will be downloaded and from which they will be seeded on startup.
                     </small>
+                    
                 </div>
 
 

@@ -7,9 +7,8 @@ import { AppRatings } from "../../ReactConstants";
 import AppData from "../AppsPage/AppData";
 
 
-export async function startDownload(appToDownload: AppData, downloadingApps: AppData[], setDownloadingApps: Dispatch<SetStateAction<AppData[]>>, downloadPath: string){
+export async function startDownload(appToDownload: AppData, downloadPath: string){
     console.log("App to download is: ", appToDownload)
-    console.log("Downloading apps: ", downloadingApps)
     if (isElectron()) {
         // if (downloadingApps.filter(app => app.id === appToDownload.id).length > 0) {
         //   toast.error("Already downloading this app!");
@@ -25,22 +24,19 @@ export async function startDownload(appToDownload: AppData, downloadingApps: App
         const toastId = toast.info(`Downloading ${appToDownload.name}...`, {autoClose: false});
         console.log("Toast download id: ", toastId);
         appToDownload.toastDownloadId = toastId;
-        setDownloadingApps([...downloadingApps, appToDownload]);
-        console.log(downloadingApps)
 
         //SEND MESSAGE TO ELECTRON
 
         const { ipcRenderer } = window.require("electron");
         console.log("Before ipcRenderer")
   
-        const res = await ipcRenderer.invoke(ElectronMessages.ElectronMessages.DOWNLOAD_TORRENT, JSON.stringify({ magnet: appToDownload.magnetLink, path: downloadPath }));
+        const res = await ipcRenderer.invoke(ElectronMessages.ElectronMessages.DOWNLOAD_TORRENT, JSON.stringify({ magnet: appToDownload.magnetLink, path: downloadPath, sha: appToDownload.SHA.slice(-1)[0]  }));
         if(!res.success){
           toast.update(toastId, {
             render: `Error downloading ${appToDownload.name}!  ${res.errorMsg}`,
             type: toast.TYPE.ERROR,
             autoClose: 5000
           })
-          setDownloadingApps(downloadingApps.filter(app => app.id !== appToDownload.id));
         }
           
       } 

@@ -11,7 +11,7 @@ import { DEFAULT_EMPTY_APP } from "../../ReactConstants";
 interface PublishedProps {
   publishedApps: AppData[];
   setPublishedApps: Dispatch<SetStateAction<AppData[]>>;
-  userId: string;
+  accountId: string;
   isLoading: boolean;
   setIsLoading: Dispatch<SetStateAction<boolean>>;
   setIsUploading: Dispatch<SetStateAction<boolean>>;
@@ -21,7 +21,7 @@ interface PublishedProps {
 function PublishedPage({
   publishedApps,
   setPublishedApps,
-  userId,
+  accountId,
   isLoading,
   setIsLoading,
   setIsUploading,
@@ -34,7 +34,7 @@ function PublishedPage({
       setPublishedApps(newPublishedApps);
     };
     foo();
-  }, [userId]);
+  }, [accountId]);
 
   const [showModal, setShowModal] = useState<boolean>(false);
   const [selectedAppData, setSelectedAppData] =

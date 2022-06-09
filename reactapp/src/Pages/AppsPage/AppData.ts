@@ -17,4 +17,5 @@ interface AppData {
   toastDownloadId?: any
 }
 
+
 export default AppData;

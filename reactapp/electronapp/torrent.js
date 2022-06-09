@@ -1,7 +1,9 @@
 const { dialog } = require('electron');
 const isElectron = require('is-electron');
 const path = require("path");
-const WebTorrent = require('webtorrent-hybrid')
+const { electron } = require('process');
+const WebTorrent = require('webtorrent-hybrid');
+const { electronStore } = require('./electronStore');
 
 
 
@@ -58,13 +60,14 @@ function downloadMagnetLink(magnetLink, downloadPath = "C:\\daapstoreDownloads")
 
         torrentClient.add(magnetLink, { path: downloadPath }, function(torrent) {
             console.log('Client is downloading:', torrent.name)
-            addTorrentEventListeners(torrent)
+                // addTorrentEventListeners(torrent)
         })
+
+
     } catch (err) {
         console.log("Exception in downloadMagnetLink: ", err)
         throw err;
     }
-    console.log("C")
 
 }
 
@@ -86,6 +89,7 @@ async function getActiveTorrents() {
     //   }
     const activeTorrents = []
     torrentClient.torrents.forEach(torrent => {
+
         const torrentData = {
             magnet: torrent.magnetURI,
             name: torrent.name,
@@ -100,6 +104,12 @@ async function getActiveTorrents() {
     return activeTorrents
 
 }
+
+function getTorrents() {
+    return torrentClient.torrents
+}
+
+
 
 async function seedTorrent(torrentPath, name) {
     try {
@@ -119,9 +129,10 @@ async function seedTorrent(torrentPath, name) {
                 return
             } else {
                 // console.log("Trackers: ", torrent.announceList)
-                addTorrentEventListeners(torrent)
+                // addTorrentEventListeners(torrent)
                 magnetURI = torrent.magnetURI
                 console.log("Added event Listeners")
+
             }
 
 
@@ -142,6 +153,7 @@ async function seedTorrent(torrentPath, name) {
             // console.log("Waiting for magnet URI", torrent.magnetURI, torrent)
         }
         // console.log("AAAAAAAAAAAAAAA")
+
         return magnetURI
 
     } catch (err) {
@@ -180,9 +192,17 @@ async function addTorrentEventListeners(torrent) {
 }
 
 
+function stopAllTorrents() {
+    torrentClient.torrents.forEach(torrent => {
+        torrent.destroy()
+    })
+}
+
 module.exports = {
     downloadMagnetLink,
     seedTorrent,
     isSeedingOrDownloadingMagnetLink,
-    getActiveTorrents
+    getActiveTorrents,
+    stopAllTorrents,
+    getTorrents
 }

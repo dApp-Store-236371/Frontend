@@ -1,12 +1,14 @@
 // Modules to control application life and create native browser window
+// require('events').EventEmitter.setMaxListeners(20);
 const { app, BrowserWindow, session } = require("electron");
 const path = require("path");
 app.disableHardwareAcceleration()
+
 const { dialog } = require('electron');
-const { downloadMagnetLink, seedTorrent, isSeedingOrDownloadingMagnetLink, getActiveTorrents } = require('./torrent')
+const { downloadMagnetLink, seedTorrent, isSeedingOrDownloadingMagnetLink, getActiveTorrents, stopAllTorrents, getTorrents } = require('./torrent')
 const crypto = require('crypto');
 
-
+const { electronStore } = require('./electronStore')
 
 require("@electron/remote/main").initialize();
 const {
@@ -17,7 +19,8 @@ const {
 } = require("../src/ElectronCommunication/ElectronMessages");
 
 const fs = require("fs");
-const url = require("url");
+let torrentRecoveryData = []
+let currAccountID = undefined
 
 function createWindow() {
     // Create the browser window.
@@ -42,34 +45,17 @@ function createWindow() {
 
 
 
-    console.log(`React Address: ${REACT_ADDRESS}`);
-    /* Development */
-    //mainWindow.loadURL(REACT_ADDRESS);
-
-    /* Compiled React */
-    //mainWindow.loadFile('.\\build\\index.html')
-
-    /* Packaged App */
-    //mainWindow.loadFile('process.resourcesPath'+'\\index.html')
     if (app.isPackaged) {
         mainWindow.loadFile(process.resourcesPath + '\\app\\build\\index.html')
     } else {
+        console.log(`React Address: ${REACT_ADDRESS}`);
         mainWindow.loadURL(REACT_ADDRESS)
     }
 
     // Open the DevTools.
     mainWindow.webContents.openDevTools({ mode: "detach" });
 
-
-    // const path = await getFilePath()
-    // console.log(path)
-    // if (!path || path === "") {
-    //     console.log("No file selected")
-    //     return
-    // }
-
-    // const magnetLink = await seedTorrent(path)
-    // downloadMagnetLink(magnetLink)
+    reloadBackupTorrents()
 }
 
 
@@ -128,6 +114,12 @@ ipcMain.handle(ElectronMessages.CREATE_MAGNET, async(event, ...args) => {
         res.magnet = magnetLink
 
         console.log("Finished succesffuly getting magnet link")
+        torrentRecoveryData.push({
+            magnetLink: magnetLink,
+            path: path,
+            sha: res.sha
+        })
+
         return res;
     } catch (err) {
         console.log("Electron CREATE_MAGNET Exception: ", err)
@@ -139,11 +131,21 @@ ipcMain.handle(ElectronMessages.DOWNLOAD_TORRENT, async(event, ...args) => {
     console.log("Electron DOWNLOAD TORRENT. args: ", args)
     const argsObject = JSON.parse(args[0])
     console.log("download magnet: ", argsObject['magnet']);
-
+    console.log("expectedSha: ", argsObject['sha']);
+    const expectedSha = argsObject['sha']
     const res = { success: false, errorMsg: "" }
 
     const magnet = argsObject.magnet;
-    const path = argsObject.path
+    let path = argsObject.path
+    if (path === undefined || path === "") {
+        path = await getFilePath()
+            // if (path === undefined || path === "") {
+            //     res.success = false
+            //     res.errorMsg = "No path selected"
+            //     return res
+            // }
+    }
+
     console.log("Args object path: ", path)
     try {
 
@@ -156,6 +158,14 @@ ipcMain.handle(ElectronMessages.DOWNLOAD_TORRENT, async(event, ...args) => {
         downloadMagnetLink(magnet, path)
 
         res.success = true
+
+        torrentRecoveryData.push({
+            magnetLink: magnet,
+            path: path,
+            sha: expectedSha
+        })
+
+
         return res;
     } catch (err) {
         console.log("DEBUG: ", err)
@@ -166,18 +176,102 @@ ipcMain.handle(ElectronMessages.DOWNLOAD_TORRENT, async(event, ...args) => {
 });
 
 ipcMain.handle(ElectronMessages.GET_ACTIVE_TORRENT_DATA, async(event, ...args) => {
-    console.log("Electron GET ACTIVE TORRENT DATA")
-    console.log(args);
+    // console.log("Electron GET ACTIVE TORRENT DATA")
+    // console.log(args);
+    // console.log("GETTING ACTIVE DATA")
+
     try {
         const torrents = await getActiveTorrents()
-        console.log("torrents: ", torrents)
+            // console.log("torrents: ", torrents)
         return torrents
     } catch (err) {
-        console.log("Electron GET ACTIVE TORRENT DATA Exception: ", err)
+        console.error("Electron GET ACTIVE TORRENT DATA Exception: ", err)
         return []
     }
 
 })
+
+ipcMain.handle(ElectronMessages.ACCOUNT_ID_UPDATE, async(event, ...args) => {
+    console.log("Electron UPDATE ACCOUNT ID")
+    console.log(args);
+    if (args.length === 0) {
+        return
+    }
+    try {
+        const newAccountId = JSON.parse(args[0]).currAccount
+        console.log("newAccountId: ", newAccountId)
+        if (newAccountId === "" || newAccountId === undefined) {
+            //stop all torrents ?
+            return
+        }
+
+        //backup previous account info
+        saveActiveTorrents()
+
+        currAccountID = newAccountId
+
+        await reloadBackupTorrents()
+
+        torrentRecoveryData = []
+        return currAccountID
+
+    } catch (err) {
+        console.error("Electron UPDATE USER ID Exception: ", err)
+
+    }
+})
+
+async function reloadBackupTorrents() {
+    if (currAccountID === undefined) {
+        return
+    }
+    const currAccountData = electronStore.get(currAccountID)
+    console.log("currAccountData: ", currAccountData)
+
+    if (currAccountData === undefined) {
+        return
+    }
+
+
+    stopAllTorrents()
+    for (let i = 0; i < currAccountData.length; i++) {
+        const torrent = currAccountData[i]
+        if ((await getSHA256(torrent.path)) === torrent.sha) {
+            seedTorrent(torrent.path, path.basename(torrent.path))
+        } else {
+            downloadMagnetLink(torrent.magnetLink, torrent.path)
+        }
+    }
+
+
+}
+
+ipcMain.handle(ElectronMessages.REMOVE_TORRENT, async(event, ...args) => {
+    console.log("Electron REMOVE TORRENT")
+    const argsObject = JSON.parse(args[0])
+    if (!argsObject || !argsObject.magnet) {
+        return
+    }
+    const magnet = argsObject.magnet
+
+    try {
+        const torrents = getTorrents()
+        const sameMagnetTorrents = torrents.filter(torrent => torrent.magnetURI === magnet)
+        for (let torrent of sameMagnetTorrents) {
+            torrent.destroy()
+            console.log("torrent recovery before destroy: ", torrentRecoveryData)
+            torrentRecoveryData = torrentRecoveryData.filter(item => item.magnetLink !== torrent.magnetURI)
+            console.log("torrent recovery after destroy: ", torrentRecoveryData)
+        }
+
+
+    } catch (err) {
+        console.error("Electron REMOVE TORRENT Exception: ", err)
+    }
+})
+
+
+
 
 ipcMain.handle(ElectronMessages.SEED_TORRENT, async(event, ...args) => {
     console.log("Electron SEED FROM  MAGNET")
@@ -220,7 +314,7 @@ ipcMain.handle(ElectronMessages.SEED_TORRENT, async(event, ...args) => {
             res.errorMsg = "No file selected"
             return res
         }
-        console.log("expxectedSha: ", expectedSha)
+        console.log("expectedSha: ", expectedSha)
         if (expectedSha !== await getSHA256(path)) {
             console.log("File has been modified")
             res.success = false
@@ -234,6 +328,11 @@ ipcMain.handle(ElectronMessages.SEED_TORRENT, async(event, ...args) => {
 
         res.success = true
         console.log("Finished succesffuly seeding provided magnet link")
+        torrentRecoveryData.push({
+            magnetLink: magnetLink,
+            path: path,
+        })
+
         return res;
     } catch (err) {
         console.log("Electron SEED_MAGNET Exception: ", err)
@@ -256,13 +355,17 @@ async function getFilePath() {
 }
 
 async function getSHA256(filePath) {
-    console.log("getting sha256")
-    const fileBuffer = fs.readFileSync(filePath)
-    const hashSum = crypto.createHash('sha256');
-    hashSum.update(fileBuffer);
-    const sha256 = hashSum.digest('hex');
-    console.log("sha256: ", sha256)
-    return sha256
+    try {
+        console.log("getting sha256. Path: ", filePath)
+        const fileBuffer = fs.readFileSync(filePath)
+        const hashSum = crypto.createHash('sha256');
+        hashSum.update(fileBuffer);
+        const sha256 = hashSum.digest('hex');
+        console.log("sha256: ", sha256)
+    } catch (err) {
+        console.log("Error getting sha256: ", err)
+        return undefined
+    }
 }
 
 // const createHashFromFile = filePath => new Promise(resolve => {
@@ -283,7 +386,22 @@ app.whenReady().then(() => {
     });
 });
 
+
+
+
+function saveActiveTorrents() {
+    console.log("Saving active torrents for userid: ", currAccountID)
+    if (currAccountID !== undefined && currAccountID !== "") {
+        electronStore.set(currAccountID, torrentRecoveryData)
+    }
+}
+
 // Quit when all windows are closed.
 app.on("window-all-closed", function() {
+
+    saveActiveTorrents()
+
+
+    // On macOS it is common for applications and their menu bar
     if (process.platform !== "darwin") app.quit();
 });

@@ -16,6 +16,7 @@ import { MDBBtn } from "mdb-react-ui-kit";
 import FallbackImg from "../../../Misc/fix-invalid-image-error.png";
 import { toast } from "react-toastify";
 import AppData from "../AppsPage/AppData";
+import ElectronMessages from "../../ElectronCommunication/ElectronMessages";
 
 interface StatusTableProps {
     activeTorrents: TorrentData[];
@@ -80,6 +81,28 @@ export function StatusTable(props: StatusTableProps)
       {
         Header: "Peers Count",
         accessor: "peersNum",
+      },
+      {
+        Header: "Remove",
+        accessor: "none",
+        Cell: (value: any) => (
+        
+            <MDBBtn
+            size={"sm"}
+            onClick={() => {
+              const torrentData = value.cell.row.original
+              console.log(value.cell.row.original)
+              
+              if(isElectron()){
+                const { ipcRenderer } = window.require("electron");
+                ipcRenderer.invoke(ElectronMessages.ElectronMessages.REMOVE_TORRENT, JSON.stringify({magnet: torrentData.magnet}))
+              }
+
+            }}
+            >
+              🛑
+            </MDBBtn>)
+
       },
     ],
     []

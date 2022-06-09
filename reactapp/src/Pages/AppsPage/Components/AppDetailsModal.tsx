@@ -19,7 +19,7 @@ import isElectron from "is-electron";
 import "../../../CSS/appImage.css";
 import { toast } from "react-toastify";
 import { purchase } from "../../../Web3Communication/Web3ReactApi";
-import { startDownload } from "../../Shared/utils";
+import { startDownload, TorrentData } from "../../Shared/utils";
 
 interface AppDetailsModalProps {
   app: appData;
@@ -28,8 +28,7 @@ interface AppDetailsModalProps {
   toggleShowModal: any;
   isLoading: boolean;
   setIsLoading: Dispatch<SetStateAction<boolean>>;
-  downloadingApps: appData[];
-  setDownloadingApps: Dispatch<SetStateAction<appData[]>>;
+  activeTorrents: TorrentData[];
   downloadPath: string;
 }
 
@@ -40,8 +39,7 @@ export default function AppDetailsModal({
   toggleShowModal,
   isLoading,
   setIsLoading,
-  downloadingApps,
-  setDownloadingApps,
+  activeTorrents,
   downloadPath
 }: AppDetailsModalProps) {
   const [rating, setRating] = useState<number>(0); // initial rating value
@@ -79,7 +77,7 @@ export default function AppDetailsModal({
 
     if (ownedState) {
       //Download
-      startDownload(app, downloadingApps, setDownloadingApps, downloadPath);
+      startDownload(app, downloadPath);
     } else {
       setIsLoading(true);
       let purchasingToastId = toast(`Purchasing ${app.name}...`, {
@@ -130,7 +128,19 @@ export default function AppDetailsModal({
   };
 
   const getBtnText = () => {
-    return ownedState ? "Download" : "Purchase";
+    if(ownedState) {
+      if(activeTorrents.filter((t) => t.magnet === app.magnetLink).length > 0){
+        return "Downloading.";
+      }
+      else{
+        return "Download";
+
+
+      }
+    }
+    else {
+      return "Purchase";
+    }
   };
 
   return (
@@ -183,7 +193,9 @@ export default function AppDetailsModal({
                 <h6 id="category-paragraph-modal-elem">{`Rating`} <br/> {app.rating == -1 ? "Not Rated" : app.rating}</h6>
               </div>
               <hr />
-              <SpinnerButton onClick={handlePurchseOrDownloadBtn}>
+              <SpinnerButton onClick={handlePurchseOrDownloadBtn}
+                disabled={activeTorrents.filter((t) => t.magnet === app.magnetLink).length > 0}
+              >
                 {getBtnText()}
               </SpinnerButton>
             </MDBModalFooter>

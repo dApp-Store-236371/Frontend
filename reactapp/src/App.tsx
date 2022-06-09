@@ -30,27 +30,27 @@ toast.configure();
 
 console.log("Is running on Electron? " + isElectron());
 
-const handleDemoClick = () => {
-  if (IS_ON_ELECTRON) {
-    const { ipcRenderer } = window.require("electron");
-    const res = ipcRenderer.sendSync("alert", JSON.stringify({}));
-    console.log(res);
-  }
-  console.log("button clicked");
-};
+// const handleDemoClick = () => {
+//   if (IS_ON_ELECTRON) {
+//     const { ipcRenderer } = window.require("electron");
+//     const res = ipcRenderer.sendSync("alert", JSON.stringify({}));
+//     console.log(res);
+//   }
+//   console.log("button clicked");
+// };
 
-const handleDemoClickAsync = () => {
-  if (IS_ON_ELECTRON) {
-    const { ipcRenderer } = window.require("electron");
+// const handleDemoClickAsync = () => {
+//   if (IS_ON_ELECTRON) {
+//     const { ipcRenderer } = window.require("electron");
 
-    ipcRenderer
-      .invoke(ElectronMessages.ECHO_MSG, JSON.stringify({ payload: "HI" }))
-      .then((result: any) => {
-        console.log("invoke reply:" + result);
-      });
-  }
-  console.log("button clicked");
-};
+//     ipcRenderer
+//       .invoke(ElectronMessages.ECHO_MSG, JSON.stringify({ payload: "HI" }))
+//       .then((result: any) => {
+//         console.log("invoke reply:" + result);
+//       });
+//   }
+//   console.log("button clicked");
+// };
 
 function App() {
   localStorage.clear(); //Keeps WalletConnect from caching the data. More granularity may be required.
@@ -60,16 +60,25 @@ function App() {
   const [publishedApps, setPublishedApps] = useState<AppData[]>([]);
   const [ownedApps, setOwnedApps] = useState<AppData[]>([]);
   const [isWalletConnected, setIsWalletConnected] = useState<boolean>(false);
-  const [userId, setUserId] = useState<string>("");
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [currAccount, setCurrAccount] = useState<string>("");
   const [provider, setProvider] = useState<any>(undefined);
-  const [downloadingApps, setDownloadingApps] = useState<AppData[]>([]);
   const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
   const [defaultPath, setDefaultPath] = useState<string>("C:\\daapstoreDownloads");
 
   const [activeTorrents, setActiveTorrents] = useState<TorrentData[]>([]);
   
+
+  //update electron about account change
+  useEffect(() => {
+    console.log("Changed currAccount to " + currAccount);
+    if (isElectron()) {
+      const { ipcRenderer } = window.require("electron");
+      console.log("Sending currAccount to electron");
+      ipcRenderer.invoke(ElectronMessages.ACCOUNT_ID_UPDATE, JSON.stringify({currAccount: currAccount}));
+
+    }}, [currAccount]);
+
   //refresh torrent data
   async function refreshActiveTorrentData(){
     if(isElectron()) {
@@ -83,27 +92,7 @@ function App() {
         }
         return torrentData;
       })
-
-      
       setActiveTorrents(activeTorrentsData);
-      // const newOwnedApps = ownedApps.map(app => {
-      //   const newApp = app;
-      //   const newTorrentData = activeTorrentsData.find(
-      //     torrentData => torrentData.magnet === app.magnet
-      //   );
-      //   if (newTorrentData) {
-      //     newApp.downloadSpeed = newTorrentData.downloadSpeed;
-      //     newApp.uploadSpeed = newTorrentData.uploadSpeed;
-      //     newApp.progress = newTorrentData.progress;
-      //     newApp.totalSize = newTorrentData.totalSize;
-      //     newApp.isActive = true
-      //   }
-      //   else{
-      //     newApp.isActive = false
-      //   }
-      //   return newApp;
-      // })
-      // setOwnedApps(newOwnedApps);
     }
   }
 
@@ -137,31 +126,6 @@ function App() {
     return () => clearInterval(interval);
   }, []);
 
-  if(isElectron()){
-    const { ipcRenderer } = window.require("electron");
-    console.log("DEBUG Awaiting Electron state updates")
-    ipcRenderer.on("download-progress-update", (event:any, arg:any) => {
-      console.log("DEBUG RECEIVED ELECTRON DOWNLOAD UPDATE")
-      const appId = arg.appId;
-      const progress = arg.progress;
-      updateDownloadProgress(appId, progress);
-    });
-  }
-
-  async function updateDownloadProgress(appId: AppData, progress: number, ){
-    if (isElectron() || true) {
-      const tmp = downloadingApps.filter(app => app.id === appId.id)
-      if(tmp.length > 0){
-        const toastId = tmp[0].toastDownloadId;
-        toast.update(toastId, {
-          render: `Downloading ${appId.name}... ${progress}%`,
-          type: toast.TYPE.INFO,
-          autoClose: false
-        })
-      }
-    }
-}
-
   return (
     <div className="App">
       <HashRouter>
@@ -179,13 +143,13 @@ function App() {
               showModal={showSettingsModal}
               setShowModal={setShowSettingsModal}
         />
-        <button
+        {/* <button
           onClick={() => {
             uploadDummyApps(30);
           }}
         >
           Upload 30 Dummy Apps
-        </button>
+        </button> */}
         <SideNav />
         <NavigationBar
           setNumberOfPages={setNumberOfPages}
@@ -205,8 +169,7 @@ function App() {
                 isLoading={isLoading}
                 setIsLoading={setIsLoading}
                 currAccount={currAccount}
-                downloadingApps={downloadingApps}
-                setDownloadingApps={setDownloadingApps}
+                activeTorrents={activeTorrents}
                 provider={provider}
                 downloadPath={defaultPath}
 
@@ -220,11 +183,10 @@ function App() {
                 <PurchasesPage
                   setIsLoading={setIsLoading}
                   isLoading={isLoading}
-                  userId={userId}
+                  accountId={currAccount}
                   ownedApps={ownedApps}
                   setOwnedApps={setOwnedApps}
-                  downloadingApps={downloadingApps}
-                  setDownloadingApps={setDownloadingApps}
+                  activeTorrents={activeTorrents}
                   downloadPath={defaultPath}
                 />
               ) : (
@@ -254,7 +216,7 @@ function App() {
               <PublishedPage
                 publishedApps={publishedApps}
                 setPublishedApps={setPublishedApps}
-                userId={userId}
+                accountId={currAccount}
                 isLoading={isLoading}
                 setIsLoading={setIsLoading}
                 setIsUploading={setIsUploading}
@@ -271,7 +233,7 @@ function App() {
         ></div>{" "}
         <Footer />
       </HashRouter>
-    </div>
+    </div>  );
     /*
 <Route path={"/debug"} element={<AppDetailsModal />} />
  */
@@ -299,7 +261,7 @@ function App() {
       </BrowserRouter>
       </div>
   */
-  );
+
 }
 
 export default App;

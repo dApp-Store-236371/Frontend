@@ -9,6 +9,7 @@ import {
   getDisplayedApps,
   getDisplayedAppsObj,
 } from "../../Web3Communication/Web3ReactApi";
+import { TorrentData } from "../Shared/utils";
 
 interface AppsCatalogPageProps {
   displayedApps: Array<AppData>;
@@ -18,8 +19,7 @@ interface AppsCatalogPageProps {
   isLoading: boolean;
   setIsLoading: Dispatch<SetStateAction<boolean>>;
   currAccount: string;
-  downloadingApps: Array<AppData>;
-  setDownloadingApps: Dispatch<SetStateAction<Array<AppData>>>;
+  activeTorrents: Array<TorrentData>;
   provider: any;
   downloadPath: string;
 }
@@ -59,8 +59,7 @@ function AppsCatalogPage(props: AppsCatalogPageProps) {
         setShowModal={setShowModal}
         isLoading={props.isLoading}
         setIsLoading={props.setIsLoading}
-        downloadingApps={props.downloadingApps}
-        setDownloadingApps={props.setDownloadingApps}
+        activeTorrents={props.activeTorrents}
         downloadPath={props.downloadPath}
       />
       <div id="apps-catalog">
