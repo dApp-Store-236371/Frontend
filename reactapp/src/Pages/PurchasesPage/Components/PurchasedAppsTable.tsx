@@ -81,10 +81,15 @@ export function PurchasedAppsTable({
             navigator.clipboard.writeText(value?.value)
             toast.success("Copied to clipboard! 🎉 ", )
           }}
+          style={{
+            'backgroundColor': "#00bcd4",
+            'color': "white",
+            'margin': "1px",
+          }}
         >
-          Copy To Clipboard
+          📋
         </MDBBtn>
-      </div>
+        </div>
      )},
       {
         Header: "📥",

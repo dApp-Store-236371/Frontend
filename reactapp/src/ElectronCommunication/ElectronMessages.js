@@ -4,5 +4,6 @@ module.exports = {
         CREATE_MAGNET: "createMagnet",
         DOWNLOAD_TORRENT: "downloadTorrent",
         SEED_TORRENT: "seedTorrent",
+        GET_ACTIVE_TORRENT_DATA: "getActiveTorrentData",
     }
 }

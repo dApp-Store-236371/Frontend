@@ -1,9 +1,16 @@
+import { TorrentData } from "../Shared/utils";
+import { StatusTable } from "./StatusTable";
+
+interface StatusPageProps {
+    activeTorrents: TorrentData[];
+}
 
 
-export function StatusPage() {
+export function StatusPage(props: StatusPageProps) {
+    console.log("Status page got apps: ", props.activeTorrents);
   return (
     <div>
-      <h1>Status Page</h1>
+      <StatusTable activeTorrents={props.activeTorrents}/>
     </div>
   );
 }

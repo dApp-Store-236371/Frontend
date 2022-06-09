@@ -123,3 +123,56 @@ export async function requestSeed(app: AppData){
     return {success:false, errorMsg: "Use Desktop App"}
   }
 }
+
+export async function getActiveTorrentData() :Promise<TorrentData[]>{
+  if (IS_ON_ELECTRON) {
+    console.log("Getting active torrent data")
+
+      const { ipcRenderer } = window.require("electron");
+      console.log("Before ipcRenderer")
+
+      let activeTorrents: TorrentData[]= await ipcRenderer
+        .invoke(ElectronMessages.ElectronMessages.GET_ACTIVE_TORRENT_DATA)
+        .then((activeTorrents: any) => {
+          console.log("getActiveTorrentData reply:", activeTorrents);
+          const res = []
+          for(let rawTorrentData of activeTorrents){
+            const torrentData: TorrentData = {
+              name: rawTorrentData.name,
+              progress: rawTorrentData.progress,
+              downloadSpeed: rawTorrentData.downloadSpeed,
+              uploadSpeed: rawTorrentData.uploadSpeed,
+              magnet: rawTorrentData.magnet,
+              peersNum: rawTorrentData.peersNum,
+              path: rawTorrentData.path,
+            }
+
+       
+
+            res.push(torrentData)
+          }
+          return res
+        });
+      return activeTorrents
+    
+
+  }
+  else{
+    return []
+  }
+}
+
+
+export interface TorrentData {
+  magnet?: string,
+  name?: string,
+  progress?: number,
+  downloadSpeed?: number,
+  uploadSpeed?: number,
+  totalSize?: number,
+  path?: string,
+  isActive?: boolean,
+  peersNum?: number,
+}
+
+// export type AppDataWithTorrent = AppData & TorrentData;

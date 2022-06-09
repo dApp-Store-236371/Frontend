@@ -74,6 +74,33 @@ function isSeedingOrDownloadingMagnetLink(magnetLink) {
     return torrentsWithSameMagnet.length > 0
 }
 
+async function getActiveTorrents() {
+    // export interface TorrentData {
+    //     magnet?: string,
+    //     name?: string,
+    //     progress?: number,
+    //     downloadSpeed?: number,
+    //     uploadSpeed?: number,
+    //     totalSize?: number,
+    //     path?: string,
+    //   }
+    const activeTorrents = []
+    torrentClient.torrents.forEach(torrent => {
+        const torrentData = {
+            magnet: torrent.magnetURI,
+            name: torrent.name,
+            progress: torrent.progress,
+            downloadSpeed: torrent.downloadSpeed,
+            uploadSpeed: torrent.uploadSpeed,
+            path: torrent.path,
+            peersNum: torrent.numPeers,
+        }
+        activeTorrents.push(torrentData)
+    })
+    return activeTorrents
+
+}
+
 async function seedTorrent(torrentPath, name) {
     try {
         let magnetURI = undefined
@@ -156,5 +183,6 @@ async function addTorrentEventListeners(torrent) {
 module.exports = {
     downloadMagnetLink,
     seedTorrent,
-    isSeedingOrDownloadingMagnetLink
+    isSeedingOrDownloadingMagnetLink,
+    getActiveTorrents
 }

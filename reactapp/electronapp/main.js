@@ -3,7 +3,7 @@ const { app, BrowserWindow, session } = require("electron");
 const path = require("path");
 app.disableHardwareAcceleration()
 const { dialog } = require('electron');
-const { downloadMagnetLink, seedTorrent, isSeedingOrDownloadingMagnetLink } = require('./torrent')
+const { downloadMagnetLink, seedTorrent, isSeedingOrDownloadingMagnetLink, getActiveTorrents } = require('./torrent')
 const crypto = require('crypto');
 
 
@@ -165,6 +165,19 @@ ipcMain.handle(ElectronMessages.DOWNLOAD_TORRENT, async(event, ...args) => {
     }
 });
 
+ipcMain.handle(ElectronMessages.GET_ACTIVE_TORRENT_DATA, async(event, ...args) => {
+    console.log("Electron GET ACTIVE TORRENT DATA")
+    console.log(args);
+    try {
+        const torrents = await getActiveTorrents()
+        console.log("torrents: ", torrents)
+        return torrents
+    } catch (err) {
+        console.log("Electron GET ACTIVE TORRENT DATA Exception: ", err)
+        return []
+    }
+
+})
 
 ipcMain.handle(ElectronMessages.SEED_TORRENT, async(event, ...args) => {
     console.log("Electron SEED FROM  MAGNET")

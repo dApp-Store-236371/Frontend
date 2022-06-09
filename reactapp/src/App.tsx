@@ -25,6 +25,7 @@ import { uploadDummyApps } from "./Web3Communication/Web3ReactApi";
 import { web3 } from "./Web3Communication/Web3Init";
 import { SettingsModal } from "./Pages/Shared/SettingsModal";
 import { StatusPage } from "./Pages/StatusPage/StatusPage";
+import { getActiveTorrentData, TorrentData } from "./Pages/Shared/utils";
 toast.configure();
 
 console.log("Is running on Electron? " + isElectron());
@@ -66,14 +67,53 @@ function App() {
   const [downloadingApps, setDownloadingApps] = useState<AppData[]>([]);
   const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
   const [defaultPath, setDefaultPath] = useState<string>("C:\\daapstoreDownloads");
+
+  const [activeTorrents, setActiveTorrents] = useState<TorrentData[]>([]);
   
+  //refresh torrent data
+  async function refreshActiveTorrentData(){
+    if(isElectron()) {
+      const activeTorrentsData: TorrentData[] = await getActiveTorrentData();
+      setActiveTorrents(activeTorrentsData);
+      // const newOwnedApps = ownedApps.map(app => {
+      //   const newApp = app;
+      //   const newTorrentData = activeTorrentsData.find(
+      //     torrentData => torrentData.magnet === app.magnet
+      //   );
+      //   if (newTorrentData) {
+      //     newApp.downloadSpeed = newTorrentData.downloadSpeed;
+      //     newApp.uploadSpeed = newTorrentData.uploadSpeed;
+      //     newApp.progress = newTorrentData.progress;
+      //     newApp.totalSize = newTorrentData.totalSize;
+      //     newApp.isActive = true
+      //   }
+      //   else{
+      //     newApp.isActive = false
+      //   }
+      //   return newApp;
+      // })
+      // setOwnedApps(newOwnedApps);
+    }
+  }
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refreshActiveTorrentData()
+
+      
+      }, 2000)
+    
+
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
       // console.log('This will run every second!');
       web3.eth.getAccounts().then((accounts) => {
         setIsWalletConnected(accounts.length > 0);
-        console.log("Accounts: ", accounts);
+        // console.log("Accounts: ", accounts);
         setCurrAccount(accounts[0]);
       })    
       .catch((error) => {
@@ -211,7 +251,7 @@ function App() {
               />
             }
           />
-          <Route path={PagePaths.StatusPagePath} element={<StatusPage />} />
+          <Route path={PagePaths.StatusPagePath} element={<StatusPage activeTorrents={activeTorrents}/>} />
         </Routes>
         {/*Prevents footer to hide content */}
         <div
