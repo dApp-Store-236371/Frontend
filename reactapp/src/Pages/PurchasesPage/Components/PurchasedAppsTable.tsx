@@ -13,13 +13,14 @@ import Button from "react";
 import isElectron from "is-electron";
 import { MDBBtn } from "mdb-react-ui-kit";
 import FallbackImg from "../../../Misc/fix-invalid-image-error.png";
-import { startDownload } from "../../Shared/utils";
+import { startDownload, TorrentData } from "../../Shared/utils";
+import { toast } from "react-toastify";
 interface purchasedAppsTableProps {
   ownedApps: AppData[];
   setSelectedAppData: Dispatch<SetStateAction<AppData>>;
   setShowModal: Dispatch<SetStateAction<boolean>>;
-  appsToDownload: AppData[];
-  setAppsToDownload: Dispatch<SetStateAction<AppData[]>>;
+  activeTorrents: TorrentData[];
+  downloadPath: string;
 }
 
 
@@ -28,8 +29,8 @@ export function PurchasedAppsTable({
   ownedApps,
   setSelectedAppData,
   setShowModal,
-  appsToDownload,
-  setAppsToDownload,
+  activeTorrents,
+  downloadPath,
 }: purchasedAppsTableProps) {
 
 
@@ -61,37 +62,54 @@ export function PurchasedAppsTable({
       },
 
       {
-        Header: "",
+        Header: "Description",
         accessor: "description",
         Cell: (value: any) => {
           return value.value;
         },
       },
       {
-        Header: "",
+        Header: "Magnet 🧲",
+        accessor: "magnetLink",
+        Cell: (value: any) => (
+          <div>
+          <MDBBtn
+          size={"sm"}
+          onClick={() => {
+            navigator.clipboard.writeText(value?.value)
+            toast.success("Copied to clipboard! 🎉 ", )
+          }}
+          style={{
+            'backgroundColor': "#00bcd4",
+            'color': "white",
+            'margin': "1px",
+          }}
+        >
+          📋
+        </MDBBtn>
+        </div>
+     )},
+      {
+        Header: "📥",
         accessor: "action",
         Cell: (value: any) => (
           <div>
             <MDBBtn
               size={"sm"}
-              disabled={appsToDownload.filter(app => app.id === value.cell.row.original.id).length > 0}
+              disabled={activeTorrents.filter(torrent => torrent.magnet === value.cell.row.original.magnetLink).length > 0}
               onClick={() => downloadBtnHandler(value.cell.row.original)}
             >
               {isElectron()
                 ? ["Download"]
                 : [
-                    "Download",
-                    <br />,
-                    "Desktop Client",
-                    <br />,
-                    " To Download",
+                    "Get Desktop Client",
                   ]}
             </MDBBtn>
           </div>
         ),
       },
     ],
-    [appsToDownload]
+    [activeTorrents]
   );
   const data = useMemo(() => ownedApps, [ownedApps]);
 
@@ -123,7 +141,7 @@ export function PurchasedAppsTable({
       console.log("Row data to download: ", rowData);
       setSelectedAppData(rowData);
       // setShowModal(true);
-      await startDownload(rowData, appsToDownload, setAppsToDownload)
+      await startDownload(rowData, downloadPath)
     } else {
       window.open("https://easyupload.io/ihr4mn");
     }

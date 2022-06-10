@@ -3,7 +3,6 @@ import { IS_ON_ELECTRON } from "../../ElectronCommunication/SharedElectronConsta
 import { PublishedAppsTable } from "./Components/PublishedAppsTable";
 import AppData from "../AppsPage/AppData";
 import {
-  getOwnedApps,
   getPublishedApps,
 } from "../../Web3Communication/Web3ReactApi";
 import "../../CSS/PublishedPage.css";
@@ -12,7 +11,7 @@ import { DEFAULT_EMPTY_APP } from "../../ReactConstants";
 interface PublishedProps {
   publishedApps: AppData[];
   setPublishedApps: Dispatch<SetStateAction<AppData[]>>;
-  userId: string;
+  accountId: string;
   isLoading: boolean;
   setIsLoading: Dispatch<SetStateAction<boolean>>;
   setIsUploading: Dispatch<SetStateAction<boolean>>;
@@ -22,7 +21,7 @@ interface PublishedProps {
 function PublishedPage({
   publishedApps,
   setPublishedApps,
-  userId,
+  accountId,
   isLoading,
   setIsLoading,
   setIsUploading,
@@ -30,10 +29,12 @@ function PublishedPage({
 }: PublishedProps) {
   useEffect(() => {
     let foo = async () => {
-      setPublishedApps(await getPublishedApps());
+      const newPublishedApps = await getPublishedApps()
+      console.log('WW: newPublishedApps', newPublishedApps)
+      setPublishedApps(newPublishedApps);
     };
     foo();
-  }, [userId]);
+  }, [accountId]);
 
   const [showModal, setShowModal] = useState<boolean>(false);
   const [selectedAppData, setSelectedAppData] =

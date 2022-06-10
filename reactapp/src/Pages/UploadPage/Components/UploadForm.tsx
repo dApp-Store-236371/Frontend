@@ -2,25 +2,17 @@ import React, {ChangeEvent, Dispatch, SetStateAction, useEffect, useState} from 
 import {
   MDBInput,
   MDBBtn,
-  MDBCheckbox,
   MDBTextArea,
-  MDBValidationItem,
-  MDBInputGroup,
-  MDBValidation,
-  MDBFile,
 } from "mdb-react-ui-kit";
 import "../../../CSS/UploadForm.css";
 import {AppCategories, APPS_PER_PAGE, MAX_DESCRIPTION_LENGTH} from "../../../ReactConstants";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import "../../../CSS/appImage.css";
-import AppData from "../../AppsPage/AppData";
-import {getDisplayedApps, uploadApp} from "../../../Web3Communication/Web3ReactApi";
+import { uploadApp} from "../../../Web3Communication/Web3ReactApi";
 import { toast } from "react-toastify";
 //import { createMagnetLink } from "../../../../electronapp/main";
-import {MdNewLabel} from "react-icons/all";
-import { IS_ON_ELECTRON } from "../../../ElectronCommunication/SharedElectronConstants";
-import ElectronMessages from "../../../ElectronCommunication/ElectronMessages";
+import { createMagnetLink } from "../../Shared/utils";
 //import { createMagnetLink } from "../../../electronCommunication";
 
 interface UploadFormProps {
@@ -43,32 +35,9 @@ export default function UploadForm({
     formik.handleChange(e);
   };
 
-  async function createMagnetLink(path: string){
-      let magnetLink = ""
+  
 
-      if (IS_ON_ELECTRON) {
-        console.log("Creating magnet link")
-
-        const { ipcRenderer } = window.require("electron");
-        if (IS_ON_ELECTRON) {
-          const { ipcRenderer } = window.require("electron");
-          console.log("Before ipcRenderer")
-
-          magnetLink = await ipcRenderer
-            .invoke(ElectronMessages.ElectronMessages.CREATE_MAGNET, JSON.stringify({ path: path }))
-            .then((result: any) => {
-              console.log("createMagnet reply:" + result);
-
-              return result
-            });
-          return magnetLink
-        }
-
-      }
-    console.log("Returning empty magnet")
-
-    return magnetLink
-  }
+  
 
   useEffect(() => {
     fetch('https://api.coinbase.com/v2/exchange-rates?currency=ETH')
@@ -89,7 +58,6 @@ export default function UploadForm({
     validateOnChange: false,
     validateOnBlur: false,
     initialValues: {
-      appFile: "",
       name: "App Name",
       price: "50",
       description: "Default App Description",
@@ -99,7 +67,6 @@ export default function UploadForm({
 
     },
     validationSchema: Yup.object({
-      appFile: Yup.mixed().required("File is required"),
       name: Yup.string()
         .trim()
         .max(15, "Must be at most 15 characters long!")
@@ -130,34 +97,35 @@ export default function UploadForm({
     onSubmit: async (values) => {
 
       if (isUploading) {
-        toast.error("Wait for upload to finish before starting another!");
+        toast.error("Wait for seed initiation to finish before starting another!");
         return;
       }
       setIsUploading(true);
       console.log("Upload form submitted with values: ", values);
-      let publishingToastId = toast.loading(`Publishing ${values.name}...`, {
+      let publishingToastId = toast.loading(`Publishing ${values.name}... Don't forget to confirm the transaction!`, {
         autoClose: false,
       });
-      const file = values.appFile
       console.log("form values: ", values)
-      let magnet_link = await createMagnetLink(values.appFile);
+      try{
+        let [magnet_link, sha] = await createMagnetLink(values.appFile);
 
+      console.log("after magnet link created: ", magnet_link)
 
       //createTorrent(values.appFile);
       //.then ( (results from electron which include magnet link & SHA) => {
-      uploadApp(
+      await uploadApp(
         values.name,
         magnet_link,
         values.description,
         values.company,
         values.img_url,
         values.price,
-        "Placeholder SHA",
+        sha,
           values.category,
       )
         .then(() => {
           toast.update(publishingToastId, {
-            render: `Published ${values.name} :)`,
+            render: `Published ${values.name} 🎉🎉🎉`,
             type: "success",
             isLoading: false,
             autoClose: 5000,
@@ -165,7 +133,7 @@ export default function UploadForm({
         })
         .catch((error: any) => {
           toast.update(publishingToastId, {
-            render: `Failed to publish ${values.name}!`,
+            render: `Failed to publish ${values.name}! ${error}`,
             type: "error",
             isLoading: false,
             autoClose: 5000,
@@ -175,6 +143,21 @@ export default function UploadForm({
         .finally(() => {
           setIsUploading(false);
         });
+      }
+    
+    catch(err: any){
+      console.log("Error creating magnet link: ", err)
+      toast.update(publishingToastId, {
+        render: `Failed to publish ${values.name}! Error: ${err}`,
+        type: "error",
+        isLoading: false,
+        autoClose: 5000,
+      });
+
+    }
+    finally{
+      setIsUploading(false);
+    }
     },
   });
 
@@ -187,18 +170,7 @@ export default function UploadForm({
     <>
       <h1 id="upload-form-title"> Upload You App: </h1>
       <form id="upload-form" className="row g-3" onSubmit={handleSubmit}>
-        <div className={"row g-1"}>
-          <MDBFile
-            size="lg"
-            id="form-file-upload"
-            name="appFile"
-            value={formik.values.appFile}
-            onChange={formik.handleChange}
-          />
-          {formik.errors.name ? (
-            <p className={"invalid-field-text"}>{formik.errors.appFile}</p>
-          ) : null}
-        </div>
+
         <div className={"row g-2"}>
           <div className="col-md-4">
             <MDBInput

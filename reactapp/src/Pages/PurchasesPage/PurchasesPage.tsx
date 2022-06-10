@@ -7,27 +7,27 @@ import { DEFAULT_EMPTY_APP } from "../../ReactConstants";
 import { DownloadAppModal } from "./Components/DownloadAppModal";
 import {
   getOwnedApps,
-  getPublishedApps,
 } from "../../Web3Communication/Web3ReactApi";
+import { TorrentData } from "../Shared/utils";
 
 interface PurchasedProps {
   ownedApps: AppData[];
   setOwnedApps: Dispatch<SetStateAction<AppData[]>>;
-  userId: string;
+  accountId: string;
   isLoading: boolean;
   setIsLoading: Dispatch<SetStateAction<boolean>>;
-  downloadingApps: AppData[];
-  setDownloadingApps: Dispatch<SetStateAction<AppData[]>>;
+  activeTorrents: TorrentData[];
+  downloadPath: string;
 }
 
 function PurchasesPage({
   ownedApps,
   setOwnedApps,
-  userId,
+  accountId,
   isLoading,
   setIsLoading,
-  downloadingApps,
-  setDownloadingApps,
+  activeTorrents,
+  downloadPath,
 }: PurchasedProps) {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [selectedAppData, setSelectedAppData] =
@@ -39,7 +39,7 @@ function PurchasesPage({
       setOwnedApps(await getOwnedApps());
     };
     foo();
-  }, [userId]);
+  }, [accountId]);
 
   return (
     <>
@@ -49,10 +49,10 @@ function PurchasesPage({
         setShowModal={setShowModal}
         setSelectedAppData={setSelectedAppData}
         ownedApps={ownedApps}
-        appsToDownload={downloadingApps}
-        setAppsToDownload={setDownloadingApps}
+        activeTorrents={activeTorrents}
+        downloadPath={downloadPath}
       />
-      ;
+      
     </>
   );
 

@@ -9,6 +9,7 @@ import {
   getDisplayedApps,
   getDisplayedAppsObj,
 } from "../../Web3Communication/Web3ReactApi";
+import { TorrentData } from "../Shared/utils";
 
 interface AppsCatalogPageProps {
   displayedApps: Array<AppData>;
@@ -18,8 +19,9 @@ interface AppsCatalogPageProps {
   isLoading: boolean;
   setIsLoading: Dispatch<SetStateAction<boolean>>;
   currAccount: string;
-  downloadingApps: Array<AppData>;
-  setDownloadingApps: Dispatch<SetStateAction<Array<AppData>>>;
+  activeTorrents: Array<TorrentData>;
+  provider: any;
+  downloadPath: string;
 }
 
 function AppsCatalogPage(props: AppsCatalogPageProps) {
@@ -35,7 +37,7 @@ function AppsCatalogPage(props: AppsCatalogPageProps) {
 
   //Display Dummy apps
   useEffect(() => {
-    getDisplayedApps(0, APPS_PER_PAGE, setDisplayedApps, setNumberOfPages);
+    getDisplayedApps(0, APPS_PER_PAGE, setDisplayedApps, setNumberOfPages, );
   }, [props.currAccount]);
 
   const handlePageClick = (arg: { selected: number }) => {
@@ -57,8 +59,8 @@ function AppsCatalogPage(props: AppsCatalogPageProps) {
         setShowModal={setShowModal}
         isLoading={props.isLoading}
         setIsLoading={props.setIsLoading}
-        downloadingApps={props.downloadingApps}
-        setDownloadingApps={props.setDownloadingApps}
+        activeTorrents={props.activeTorrents}
+        downloadPath={props.downloadPath}
       />
       <div id="apps-catalog">
         <AppsCatalog
@@ -66,6 +68,7 @@ function AppsCatalogPage(props: AppsCatalogPageProps) {
           setDisplayedApps={setDisplayedApps}
           toggleShowModal={toggleShowModal}
           setSelectedAppData={setSelectedAppData}
+          provider={props.provider}
         />
       </div>
       <div id="pagination-div">

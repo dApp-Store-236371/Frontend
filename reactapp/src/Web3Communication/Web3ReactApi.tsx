@@ -10,7 +10,9 @@ import {
   DAPPSTORE_CONTRACT_ADDRESS,
 } from "./Contracts/dAppContract";
 import { Dispatch, SetStateAction } from "react";
-import {AppCategories} from "../ReactConstants";
+import {AppCategories, AppRatings} from "../ReactConstants";
+import { bool, boolean } from "yup";
+import { ratingEnumToNumber } from "../Pages/Shared/utils";
 
 export async function getPublishedApps() {
   if (IS_DEBUG) {
@@ -41,12 +43,13 @@ export async function getPublishedApps() {
             version: 1,
             publication_date: "1.1.1",
             published: solidityStruct.creator === getCurrAccount(),
-            category: AppCategories.Games
+            category: AppCategories.Games,
+            magnetLink: solidityStruct.magnetLink,
           };
           publishedApps.push(app);
         });
-
-        return res;
+        console.log("getpublished apps res:  ", publishedApps);
+        return publishedApps;
       })
       .catch((error: any) => {
         console.log("ERROR in getContractValue", error);
@@ -86,7 +89,8 @@ export async function getOwnedApps() {
             version: 1,
             publication_date: "1.1.1",
             published: solidityStruct.creator === getCurrAccount(),
-            category: AppCategories.Games
+            category: AppCategories.Games,
+            magnetLink: solidityStruct.magnetLink
           };
           ownedApps.push(app);
         });
@@ -112,21 +116,60 @@ export const getDisplayedApps = async (
   itemsPerPage: number,
   setDisplayedApps: Dispatch<SetStateAction<Array<AppData>>>,
   setNumberOfPages: Dispatch<SetStateAction<number>>,
-  filter?: string,
-  selectedCategory?: string
+  textFilter?: string,
+  selectedCategory?: string,
+  selectedRating?: AppRatings
 ) => {
   //request to fetch apps [(pageNum*itemsPerPage + 1), (pageNum*itemsPerPage + itemsPerPage) )
   let res: getDisplayedAppsObj;
   if (IS_DEBUG) {
-    res = await fetchDummyDisplayedApps(itemsPerPage, pageNum, filter);
+    res = await fetchDummyDisplayedApps(itemsPerPage, pageNum, textFilter);
     setDisplayedApps(res.displayedApps);
     setNumberOfPages(res.pageCount);
   } else {
-    res = await fetchDisplayedApps(itemsPerPage, pageNum, filter, selectedCategory);
-    setDisplayedApps(res.displayedApps);
+    res = await fetchDisplayedApps(itemsPerPage, pageNum, textFilter, selectedCategory);
+
+    let appsToDisplay: AppData[] = [];
+    if( (!selectedCategory || selectedCategory === AppCategories.All) && (!selectedRating || selectedRating === AppRatings.All) && (textFilter === "" || !textFilter)){ 
+      console.log("AAAA", textFilter, selectedCategory, selectedRating);
+      console.log("no filters: ", res.displayedApps)
+      appsToDisplay = res.displayedApps;
+    }
+    else{
+      appsToDisplay = await res.displayedApps.filter( (app) => {
+                        return appSatisfiesFilters(app, textFilter, selectedCategory, selectedRating);
+                    })
+  }
+    console.log("filtered apps: ", appsToDisplay)
+    setDisplayedApps(appsToDisplay);
     setNumberOfPages(res.pageCount);
   }
 };
+
+
+const appSatisfiesFilters = (app: AppData, textFilter?: string, selectedCategory?: string, selectedRating?: AppRatings) => {
+  console.log("appSatisfiesFilters", textFilter, selectedCategory, selectedRating);
+
+  let satisfiesTextFilter: boolean = false
+  let satisfiesCategoryFilter: boolean = false
+  let satisfiesRatingFilter: boolean = false
+
+  if(!textFilter || textFilter === "" || app.name.includes(textFilter)){
+    satisfiesTextFilter = true;
+  }
+  if(!selectedCategory || selectedCategory === AppCategories.All || selectedCategory === app.category){
+    satisfiesCategoryFilter = true;
+  }
+  if(!selectedRating || selectedRating === AppRatings.All || ratingEnumToNumber(selectedRating) <= app.rating){
+    satisfiesRatingFilter = true;
+  }
+
+  return satisfiesTextFilter && satisfiesCategoryFilter && satisfiesRatingFilter;
+
+}
+
+
+
 
 const fetchDummyDisplayedApps = async (
   itemsPerPage: number,
@@ -196,7 +239,8 @@ export const uploadApp = async (
   sha: string,
   category: string
 ) => {
-  console.log("Uploading App: ", name);
+  console.log("Uploading App: ", name, magnetLink);
+  
 
   let contract = await createContract(
     DAPPSTORE_ABI,
@@ -303,7 +347,8 @@ const fetchDisplayedApps = async (
           version: 1,
           publication_date: "1.1.1",
           published: solidityStruct.creator === getCurrAccount(),
-          category: AppCategories.Games
+          category: AppCategories.Games,
+          magnetLink: solidityStruct.magnetLink,
         };
         appsToDisplay.push(app);
       });
@@ -319,14 +364,28 @@ const fetchDisplayedApps = async (
   return res;
 };
 
-export async function getFeaturedApp() : Promise<AppData> {
+export async function getFeaturedApp() : Promise<AppData|undefined> {
     //TODO: fetch number of apps, and then an app randomly.
-  
-    //Meanwhile:
-    const numOfApps = DUMMY_APPS.length;
-    const featuredAppIndex =Math.floor(Math.random() * numOfApps-1);
-    return DUMMY_APPS[featuredAppIndex];
+    try{
+    console.log("Fetching features app")
 
+      //dummy call to get length quick and very very dirty
+      const totalNumOfApps = 10 //TODO: CHANGE THIS
+    const featuredAppRandomness: number =  Math.ceil((Math.random() * 100000)) % totalNumOfApps;//TODO: Change
+    const featuresApp = (await fetchDisplayedApps(1, featuredAppRandomness, undefined, undefined)).displayedApps[0];
+    console.log("Featured app: ", featuresApp);
+    return featuresApp;
+
+  
+    // //Meanwhile:
+    // const numOfApps = DUMMY_APPS.length;
+    // const featuredAppIndex =Math.floor(Math.random() * numOfApps-1);
+    // return DUMMY_APPS[featuredAppIndex];
+    }
+    catch(err){
+        console.log("Error fetching featured app: ", err);
+        return undefined;
+    }
 
 }
 

@@ -18,7 +18,7 @@ for (let i = 0; i < 50; i++) {
     name: `App #${i}`,
     publication_date: "1.5.2022",
     rating: 3,
-    SHA: "256da46546fd",
+    SHA: ["256da46546fd"],
     version: 1.0,
     owned: i % 2 === 0 ? true : false,
     published: i % 2 === 0 ? true : false,
@@ -46,7 +46,7 @@ for (let i = 0; i < 20; i++) {
     publication_date:
       i % 3 === 0 ? "2.5.2022" : i % 1 === 1 ? "2.4.2078" : "1.1.0000",
     rating: i % 6,
-    SHA: "256da46546fd",
+    SHA: ["256da46546fd"],
     version: i % 6,
     owned: i % 2 === 0 ? true : false,
     published: true,
@@ -73,7 +73,7 @@ for (let i = 0; i < 20; i++) {
     publication_date:
       i % 3 === 0 ? "2.5.2022" : i % 1 === 1 ? "2.4.2078" : "1.1.0000",
     rating: i % 6,
-    SHA: "256da46546fd",
+    SHA: ["256da46546fd"],
     version: i % 6,
     owned: true,
     published: i % 2 === 0 ? true : false,

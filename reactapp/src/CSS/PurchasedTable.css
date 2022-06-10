@@ -1,52 +1,37 @@
-.my-purchases-app-image{
+.my-purchases-app-image {
     max-width: 18em;
     height: auto;
 }
 
-
 .purchased-table {
     border-collapse: separate;
-
     margin: 25px 0;
     font-size: 0.9em;
     font-family: sans-serif;
     min-width: 400px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
-    margin-right:auto;
+    margin-right: auto;
     margin-left: auto;
-
     max-width: 70vw;
-
-
-
 }
+
 .purchased-table thead tr {
     background-color: #009879;
     color: #ffffff;
-    text-align: left;
-
-
+    text-align: center;
 }
 
 .purchased-table th,
 .purchased-table td {
     padding: 12px 15px;
-
-
 }
-
-
 
 .purchased-table tbody tr {
     border-bottom: 1px solid #dddddd;
-
-
-
 }
 
 .purchased-table tbody tr:nth-of-type(even) {
     background-color: #f3f3f3;
-
 }
 
 .purchased-table tbody tr:last-of-type {
@@ -74,6 +59,6 @@
     color: white;
 }
 
-.global-filter{
+.global-filter {
     margin-top: 20px
 }

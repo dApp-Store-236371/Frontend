@@ -13,6 +13,8 @@ import { GlobalFilter } from "./GlobalFilter";
 import Button from "react";
 import isElectron from "is-electron";
 import { MDBBtn } from "mdb-react-ui-kit";
+import { toast } from "react-toastify";
+import { requestSeed } from "../../Shared/utils";
 interface PublishedAppsTableProps {
   publishedApps: AppData[];
   setSelectedAppData: Dispatch<SetStateAction<AppData>>;
@@ -24,6 +26,9 @@ export function PublishedAppsTable({
   setSelectedAppData,
   setShowModal,
 }: PublishedAppsTableProps) {
+
+  console.log("RR", publishedApps);
+
   const columns = useMemo(
     () => [
       {
@@ -44,16 +49,44 @@ export function PublishedAppsTable({
         accessor: "price",
       },
       {
-        Header: "Publication Date",
-        accessor: "publication_date",
-        sortType: (a: any, b: any) => {
-          let a1 = new Date(a.original.publication_date);
-          let b1 = new Date(b.original.publication_date);
-          if (a1 < b1) return 1;
-          else if (a1 > b1) return -1;
-          else return 0;
-        },
-      },
+        Header: "Magnet 🧲",
+        accessor: "magnetLink",
+        Cell: (value: any) => (
+          <div>
+          <MDBBtn
+          size={"sm"}
+          onClick={() => {
+            navigator.clipboard.writeText(value?.value)
+            toast.success("Copied to clipboard! 🎉 ", )
+          }}
+          style={{
+            'backgroundColor': "#00bcd4",
+            'color': "white",
+            'margin': "1px",
+          }}
+        >
+          📋
+        </MDBBtn>
+        {isElectron() && (
+        <MDBBtn
+          size={"sm"}
+          onClick={async () => {
+              console.log("TT: ", value?.cell.row);
+              requestSeed(value.cell.row.original)
+              .then((res) => {
+                
+                toast.info("Seeding... " + res.errorMsg, )
+              })
+              .catch((e) => {
+                toast.error("Seeding failed! " + e)
+              })
+
+          }}
+        >
+          Seed
+        </MDBBtn>)}
+      </div>
+     )},
       {
         Header: "",
         accessor: "action",

@@ -8,6 +8,7 @@ export const PagePaths = {
   NotFoundPagePath: "*",
   MyPublishedPagePath: "/published",
   LoginPagePath: "/login",
+  StatusPagePath: "/status",
 };
 
 export const APPS_PER_PAGE: number = 16;
@@ -24,6 +25,15 @@ export const AppCategories = {
   Other: "Other"
 }
 
+export  enum AppRatings  {
+  All= "Any Rating",
+  One= "1+ Stars",
+  Two= "2+ Stars",
+  Three= "3+ Stars",
+  Four= "4+ Stars",
+  Five= "5 Stars",
+}
+
 export const DEFAULT_EMPTY_APP: AppData = {
   id: 0,
   company: `Cool Dev`,
@@ -33,7 +43,7 @@ export const DEFAULT_EMPTY_APP: AppData = {
   name: `Dummy App`,
   publication_date: "1.5.2022",
   rating: 5,
-  SHA: "256da46546fd",
+  SHA: ["256da46546fd"],
   version: 1.0,
   owned: true,
   myRating: 4,

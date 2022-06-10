@@ -1,7 +1,9 @@
 const { dialog } = require('electron');
 const isElectron = require('is-electron');
 const path = require("path");
-const WebTorrent = require('webtorrent-hybrid')
+const { electron } = require('process');
+const WebTorrent = require('webtorrent-hybrid');
+const { electronStore } = require('./electronStore');
 
 
 
@@ -38,38 +40,121 @@ const announceList = [
 
 ]
 
-async function downloadMagnetLink(magnetLink, downloadPath = "C:\\daapstoreDownloads") {
+function downloadMagnetLink(magnetLink, downloadPath = "C:\\daapstoreDownloads") {
     console.log("B")
     try {
+        const torrentsWithSameMagnet = torrentClient.torrents.filter(t => t.magnetURI === magnetLink)
+        console.log("torrentsWithSameMagnet: ", torrentsWithSameMagnet)
+        if (torrentsWithSameMagnet.length > 0) {
+            console.log("Torrent already exists")
+            if (torrentsWithSameMagnet[0].progress === 1) {
+                console.log("Torrent already downloaded")
+                throw new Error("Torrent already downloaded")
+            } else {
+                console.log("Torrent already downloading")
+                throw new Error("Torrent already downloading")
+            }
+        }
+
+
+
         torrentClient.add(magnetLink, { path: downloadPath }, function(torrent) {
             console.log('Client is downloading:', torrent.name)
-            addTorrentEventListeners(torrent)
+                // addTorrentEventListeners(torrent)
         })
+
+
     } catch (err) {
         console.log("Exception in downloadMagnetLink: ", err)
+        throw err;
     }
-    console.log("C")
 
 }
 
+function isSeedingOrDownloadingMagnetLink(magnetLink) {
+    const torrentsWithSameMagnet = torrentClient.torrents.filter(t => t.magnetURI === magnetLink)
+    console.log("torrentsWithSameMagnet: ", torrentsWithSameMagnet, torrentsWithSameMagnet.length > 0)
+    return torrentsWithSameMagnet.length > 0
+}
+
+async function getActiveTorrents() {
+    // export interface TorrentData {
+    //     magnet?: string,
+    //     name?: string,
+    //     progress?: number,
+    //     downloadSpeed?: number,
+    //     uploadSpeed?: number,
+    //     totalSize?: number,
+    //     path?: string,
+    //   }
+    const activeTorrents = []
+    torrentClient.torrents.forEach(torrent => {
+
+        const torrentData = {
+            magnet: torrent.magnetURI,
+            name: torrent.name,
+            progress: torrent.progress,
+            downloadSpeed: torrent.downloadSpeed,
+            uploadSpeed: torrent.uploadSpeed,
+            path: torrent.path,
+            peersNum: torrent.numPeers,
+        }
+        activeTorrents.push(torrentData)
+    })
+    return activeTorrents
+
+}
+
+function getTorrents() {
+    return torrentClient.torrents
+}
+
+
+
 async function seedTorrent(torrentPath, name) {
-
-
-
     try {
+        let magnetURI = undefined
+
         const torrent = torrentClient.seed(torrentPath, { name: name, announceList: announceList }, function(torrent) {
             console.log('Client is seeding:', torrent.name)
             console.log('Magnet Link: ', torrent.magnetURI)
+
+
+            console.log("ALL Torrents: ", torrentClient.torrents)
+            const torrentsWithSameInfoHash = torrentClient.torrents.filter(t => t.infoHash === torrent.infoHash)
+            console.log("torrentsWithSameInfoHash: ", torrentsWithSameInfoHash)
+            if (torrentsWithSameInfoHash.length > 0) {
+                console.log("Torrent already exists with magnet link: ", torrentsWithSameInfoHash[0].magnetURI)
+                magnetURI = torrentsWithSameInfoHash[0].magnetURI
+                return
+            } else {
                 // console.log("Trackers: ", torrent.announceList)
-            addTorrentEventListeners(torrent)
+                // addTorrentEventListeners(torrent)
+                magnetURI = torrent.magnetURI
+                console.log("Added event Listeners")
+
+            }
+
+
         })
 
-        while (!torrent.magnetURI) {
+        let timeout_counter = 30
+        while (!magnetURI) {
+
+            if (timeout_counter === 0) {
+                throw new Error("Timeout")
+            }
+
             //sleep in js
             await new Promise(resolve => setTimeout(resolve, 1000));
-        }
 
-        return torrent.magnetURI
+            timeout_counter--
+
+            // console.log("Waiting for magnet URI", torrent.magnetURI, torrent)
+        }
+        // console.log("AAAAAAAAAAAAAAA")
+
+        return magnetURI
 
     } catch (err) {
         console.log("Exception in seedTorrent: ", err)
@@ -107,7 +192,17 @@ async function addTorrentEventListeners(torrent) {
 }
 
 
+function stopAllTorrents() {
+    torrentClient.torrents.forEach(torrent => {
+        torrent.destroy()
+    })
+}
+
 module.exports = {
     downloadMagnetLink,
-    seedTorrent
+    seedTorrent,
+    isSeedingOrDownloadingMagnetLink,
+    getActiveTorrents,
+    stopAllTorrents,
+    getTorrents
 }

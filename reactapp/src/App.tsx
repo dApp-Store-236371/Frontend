@@ -22,31 +22,35 @@ import { LoginModal } from "./Pages/LoginPage/LoginModal";
 import Web3 from "web3";
 import { Web3TestPage } from "./Web3Communication/Web3TestPage";
 import { uploadDummyApps } from "./Web3Communication/Web3ReactApi";
+import { web3 } from "./Web3Communication/Web3Init";
+import { SettingsModal } from "./Pages/Shared/SettingsModal";
+import { StatusPage } from "./Pages/StatusPage/StatusPage";
+import { getActiveTorrentData, TorrentData } from "./Pages/Shared/utils";
 toast.configure();
 
 console.log("Is running on Electron? " + isElectron());
 
-const handleDemoClick = () => {
-  if (IS_ON_ELECTRON) {
-    const { ipcRenderer } = window.require("electron");
-    const res = ipcRenderer.sendSync("alert", JSON.stringify({}));
-    console.log(res);
-  }
-  console.log("button clicked");
-};
+// const handleDemoClick = () => {
+//   if (IS_ON_ELECTRON) {
+//     const { ipcRenderer } = window.require("electron");
+//     const res = ipcRenderer.sendSync("alert", JSON.stringify({}));
+//     console.log(res);
+//   }
+//   console.log("button clicked");
+// };
 
-const handleDemoClickAsync = () => {
-  if (IS_ON_ELECTRON) {
-    const { ipcRenderer } = window.require("electron");
+// const handleDemoClickAsync = () => {
+//   if (IS_ON_ELECTRON) {
+//     const { ipcRenderer } = window.require("electron");
 
-    ipcRenderer
-      .invoke(ElectronMessages.ECHO_MSG, JSON.stringify({ payload: "HI" }))
-      .then((result: any) => {
-        console.log("invoke reply:" + result);
-      });
-  }
-  console.log("button clicked");
-};
+//     ipcRenderer
+//       .invoke(ElectronMessages.ECHO_MSG, JSON.stringify({ payload: "HI" }))
+//       .then((result: any) => {
+//         console.log("invoke reply:" + result);
+//       });
+//   }
+//   console.log("button clicked");
+// };
 
 function App() {
   localStorage.clear(); //Keeps WalletConnect from caching the data. More granularity may be required.
@@ -56,37 +60,71 @@ function App() {
   const [publishedApps, setPublishedApps] = useState<AppData[]>([]);
   const [ownedApps, setOwnedApps] = useState<AppData[]>([]);
   const [isWalletConnected, setIsWalletConnected] = useState<boolean>(false);
-  const [userId, setUserId] = useState<string>("");
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [currAccount, setCurrAccount] = useState<string>("");
+  const [provider, setProvider] = useState<any>(undefined);
+  const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
+  const [defaultPath, setDefaultPath] = useState<string>("C:\\daapstoreDownloads");
 
-  const [downloadingApps, setDownloadingApps] = useState<AppData[]>([]);
+  const [activeTorrents, setActiveTorrents] = useState<TorrentData[]>([]);
   
 
-  if(isElectron()){
-    const { ipcRenderer } = window.require("electron");
-    console.log("DEBUG Awaiting Electron state updates")
-    ipcRenderer.on("download-progress-update", (event:any, arg:any) => {
-      console.log("DEBUG RECEIVED ELECTRON DOWNLOAD UPDATE")
-      const appId = arg.appId;
-      const progress = arg.progress;
-      updateDownloadProgress(appId, progress);
-    });
+  //update electron about account change
+  useEffect(() => {
+    console.log("Changed currAccount to " + currAccount);
+    if (isElectron()) {
+      const { ipcRenderer } = window.require("electron");
+      console.log("Sending currAccount to electron");
+      ipcRenderer.invoke(ElectronMessages.ACCOUNT_ID_UPDATE, JSON.stringify({currAccount: currAccount}));
+
+    }}, [currAccount]);
+
+  //refresh torrent data
+  async function refreshActiveTorrentData(){
+    if(isElectron()) {
+      let activeTorrentsData: TorrentData[] = await getActiveTorrentData();
+      activeTorrentsData = activeTorrentsData.map(torrentData => {
+        const appData: AppData|undefined = ownedApps.find(app => app.magnetLink === torrentData.magnet);
+        if(appData !== undefined){
+          console.log("Found app data for torrent: " + torrentData.magnet);
+          torrentData.appName = appData.name;
+          torrentData.appId = appData.id;
+        }
+        return torrentData;
+      })
+      setActiveTorrents(activeTorrentsData);
+    }
   }
 
-  async function updateDownloadProgress(appId: AppData, progress: number, ){
-    if (isElectron() || true) {
-      const tmp = downloadingApps.filter(app => app.id === appId.id)
-      if(tmp.length > 0){
-        const toastId = tmp[0].toastDownloadId;
-        toast.update(toastId, {
-          render: `Downloading ${appId.name}... ${progress}%`,
-          type: toast.TYPE.INFO,
-          autoClose: false
-        })
-      }
-    }
-}
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refreshActiveTorrentData()
+
+      
+      }, 2000)
+    
+
+
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // console.log('This will run every second!');
+      web3.eth.getAccounts().then((accounts) => {
+        setIsWalletConnected(accounts.length > 0);
+        // console.log("Accounts: ", accounts);
+        setCurrAccount(accounts[0]);
+      })    
+      .catch((error) => {
+        console.log(error);
+      });
+      }, 3000)
+    
+
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="App">
@@ -94,19 +132,30 @@ function App() {
         <LoginModal
           setIsWalletConnected={setIsWalletConnected}
           setCurrAccount={setCurrAccount}
+          isWalletConnected={isWalletConnected}
+          provider={provider}
+          setProvider={setProvider}
         />
-        <button
+        <SettingsModal
+              setDefaultPath={setDefaultPath}
+              defaultPath={defaultPath}
+              currAccount={currAccount}
+              showModal={showSettingsModal}
+              setShowModal={setShowSettingsModal}
+        />
+        {/* <button
           onClick={() => {
             uploadDummyApps(30);
           }}
         >
           Upload 30 Dummy Apps
-        </button>
+        </button> */}
         <SideNav />
         <NavigationBar
           setNumberOfPages={setNumberOfPages}
           setDisplayedApps={setDisplayedApps}
           currAccount={currAccount}
+          setShowSettingsModal={setShowSettingsModal}
         />
         <Routes>
           <Route
@@ -120,8 +169,10 @@ function App() {
                 isLoading={isLoading}
                 setIsLoading={setIsLoading}
                 currAccount={currAccount}
-                downloadingApps={downloadingApps}
-                setDownloadingApps={setDownloadingApps}
+                activeTorrents={activeTorrents}
+                provider={provider}
+                downloadPath={defaultPath}
+
               />
             }
           />
@@ -132,11 +183,11 @@ function App() {
                 <PurchasesPage
                   setIsLoading={setIsLoading}
                   isLoading={isLoading}
-                  userId={userId}
+                  accountId={currAccount}
                   ownedApps={ownedApps}
                   setOwnedApps={setOwnedApps}
-                  downloadingApps={downloadingApps}
-                  setDownloadingApps={setDownloadingApps}
+                  activeTorrents={activeTorrents}
+                  downloadPath={defaultPath}
                 />
               ) : (
                 <LoginPage />
@@ -165,7 +216,7 @@ function App() {
               <PublishedPage
                 publishedApps={publishedApps}
                 setPublishedApps={setPublishedApps}
-                userId={userId}
+                accountId={currAccount}
                 isLoading={isLoading}
                 setIsLoading={setIsLoading}
                 setIsUploading={setIsUploading}
@@ -173,6 +224,7 @@ function App() {
               />
             }
           />
+          <Route path={PagePaths.StatusPagePath} element={<StatusPage activeTorrents={activeTorrents}/>} />
         </Routes>
         {/*Prevents footer to hide content */}
         <div
@@ -181,7 +233,7 @@ function App() {
         ></div>{" "}
         <Footer />
       </HashRouter>
-    </div>
+    </div>  );
     /*
 <Route path={"/debug"} element={<AppDetailsModal />} />
  */
@@ -209,7 +261,7 @@ function App() {
       </BrowserRouter>
       </div>
   */
-  );
+
 }
 
 export default App;

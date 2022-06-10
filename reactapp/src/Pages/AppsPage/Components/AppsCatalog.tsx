@@ -9,13 +9,17 @@ interface AppsCatalogProps {
   setDisplayedApps: Dispatch<SetStateAction<AppData[]>>;
   toggleShowModal: any;
   setSelectedAppData: any;
+  provider: any;
 }
 function AppsCatalog(props: AppsCatalogProps) {
   return (
     <>
 
-  <FeaturedAppsTile toggleShowModal={props.toggleShowModal}
-          setSelectedAppData={props.setSelectedAppData} />
+  <FeaturedAppsTile 
+          toggleShowModal={props.toggleShowModal}
+          setSelectedAppData={props.setSelectedAppData}
+          provider={props.provider}
+           />
     <div id="apps-catalog-warpper">
       {props.displayedApps.map((appData) => (
         <AppTile
