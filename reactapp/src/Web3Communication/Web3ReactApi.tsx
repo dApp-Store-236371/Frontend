@@ -268,7 +268,7 @@ export const purchase = async (id: number, price: number) => {
   );
 
   await contract.methods
-    .purchase(id)
+    .purchaseApp(id)
     .send({ from: await getCurrAccount(), value: price })
     .then(() => {
       console.log("Finished Purchasing");
@@ -324,6 +324,12 @@ const fetchDisplayedApps = async (
     }`
   );
 
+
+  // contract.methods.createXApps(1).send({ from: await getCurrAccount()}).then( () => {
+  //   console.log("EEEEEEEEEEEEEB")
+  // }).catch( (err: any) => {
+  //   console.error("Error creating apps: ", err);
+  // })
   // const random_offset = 3;
 
   const  totalNumOfApps = await getTotalNumOfApps()

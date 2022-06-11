@@ -175,13 +175,32 @@ export interface TorrentData {
 
 // export type AppDataWithTorrent = AppData & TorrentData;
 
-export   async function checkImage(url: string|undefined){
+export async function checkImage(url: string|undefined){
   if(url===undefined){
-   return
+    console.log("No image found")
+   return false
  }
- const res = await fetch(url);
- const buff = await res.blob();
- console.log("BUFF: ", buff)
- return buff.type.startsWith('image/')
+  const res = await  new Promise((resolve) => {
+      const img = new Image();
+
+      img.src = url;
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+    });
+  return res
+
+//   console.log("Checking image: ", url)
+//   try{
+//   const res = await fetch(url);
+//   console.log("fetchedRes: ", res)
+//   const buff = await res.blob();
+//   console.log("BUFF: ", buff)
+//   return buff.type.startsWith('image/')
+//  }
+//   catch(e: any){
+//     console.log("Error checking image: ", e.message)
+    
+//     return false
+//   }
 
 } 

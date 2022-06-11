@@ -19,7 +19,7 @@ import isElectron from "is-electron";
 import "../../../CSS/appImage.css";
 import { toast } from "react-toastify";
 import { purchase } from "../../../Web3Communication/Web3ReactApi";
-import { startDownload, TorrentData } from "../../Shared/utils";
+import { checkImage, startDownload, TorrentData } from "../../Shared/utils";
 
 interface AppDetailsModalProps {
   app: appData;
@@ -55,6 +55,8 @@ export default function AppDetailsModal({
   useEffect(() => {
     setRating(app.myRating === undefined ? 0 : app.myRating);
     setOwnedStateState(app.owned);
+    checkImage(app.img_url);
+    console.log("AppDetailsModal: image: ", app.img_url);
   }, [app]);
 
   const handleRatingChanged = (newRating: number) => {
