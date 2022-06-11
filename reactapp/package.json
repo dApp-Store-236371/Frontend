@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "homepage": "./",
   "private": true,
+  "proxy": "http://localhost:5000",
   "author": {
     "name": "Carmel Hecht",
     "email": "hechtcarmel@campus.technion.ac.il",

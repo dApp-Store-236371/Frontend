@@ -13,6 +13,7 @@ import { Dispatch, SetStateAction } from "react";
 import {AppCategories, AppRatings} from "../ReactConstants";
 import { bool, boolean } from "yup";
 import { ratingEnumToNumber } from "../Pages/Shared/utils";
+import App from "../App";
 
 export async function getPublishedApps() {
   if (IS_DEBUG) {
@@ -322,18 +323,41 @@ const fetchDisplayedApps = async (
       currPageNum * itemsPerPage + itemsPerPage
     }`
   );
-  let from_index: number = currPageNum * itemsPerPage + 1;
-  let to_index: number = from_index + itemsPerPage;
-  let res = await contract.methods
-    .getApps(from_index, to_index, await getCurrAccount())
+
+  // const random_offset = 3;
+
+  const  totalNumOfApps = await contract.methods.getAppCount().call()
+  .catch((error: any) => {
+    console.log("ERROR in getContractValue", error);
+    return  0
+  })
+  
+  const numberOfPages =  Math.ceil(totalNumOfApps / itemsPerPage);
+  const appsOnLastPage = totalNumOfApps % itemsPerPage;
+  // console.log("totalNumOfApps", totalNumOfApps);
+  // console.log("itemsPerPage", itemsPerPage);
+  // console.log("appsOnLastPage: ", appsOnLastPage);
+
+  let index: number = currPageNum * itemsPerPage;
+  let to_index: number = Math.min(index + itemsPerPage, totalNumOfApps);
+  let requested_len = itemsPerPage;
+
+  if (currPageNum === numberOfPages-1) {
+    console.log("Last Page. appsOnLastPage: ", appsOnLastPage);
+      requested_len = appsOnLastPage;
+  }
+
+  console.log("page: ", currPageNum)
+  console.log("index: ", index);
+  console.log("length: ", requested_len);
+  let appDatas = await contract.methods
+    .getAppBatch(index , requested_len)
     .call()
     .then((res: any) => {
       console.log("fetchDisplayedApps returned = ", res);
-      console.log("result returned apps array: ", res.result);
-      console.log("result returned totalNumOfApps: ", res.totalNumOfApps);
-
+      
       let appsToDisplay: Array<AppData> = [];
-      res.result.forEach((solidityStruct: any) => {
+      res.forEach((solidityStruct: any) => {
         let app: AppData = {
           id: solidityStruct.id,
           name: solidityStruct.name,
@@ -347,21 +371,28 @@ const fetchDisplayedApps = async (
           version: 1,
           publication_date: "1.1.1",
           published: solidityStruct.creator === getCurrAccount(),
-          category: AppCategories.Games,
+          category: solidityStruct.category ? solidityStruct.category : AppCategories.Games,
           magnetLink: solidityStruct.magnetLink,
         };
         appsToDisplay.push(app);
       });
-      let numberOfPages = Math.ceil(res.totalNumOfApps / itemsPerPage);
 
-      return { displayedApps: appsToDisplay, pageCount: numberOfPages };
+      return appsToDisplay
     })
     .catch((error: any) => {
-      console.log("ERROR in getContractValue", error);
-      return { displayedApps: [], pageCount: 1 };
+      console.error("ERROR in getContractValue", error);
+      return  []
     });
-  console.log("res= ", res);
-  return res;
+
+
+
+  
+
+  
+  console.log("res= ", appDatas);
+  console.log("pageCount: ", numberOfPages)
+  return { displayedApps: appDatas, pageCount: numberOfPages };
+
 };
 
 export async function getFeaturedApp() : Promise<AppData|undefined> {
