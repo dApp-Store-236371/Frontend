@@ -1,7 +1,8 @@
 import { createContract } from "../Web3Utils";
 
 export const DAPPSTORE_CONTRACT_ADDRESS =
-    "0x1F70E98Da4Cfc4695Fe6D764255CA084ac789BBd"
+    "0x6a5B11650FA8187B35d9a792632e88C2f0Ad1A37"
+    // "0x1F70E98Da4Cfc4695Fe6D764255CA084ac789BBd"
     //"0x4b41234D02E379400EfBEE11AB15797a6c0c82dA"
     //"0x1024f69C9F88639A72A8123A3a03ebdeD2E0A803"; //Version 5 Rinkeby, getApps requires sender
     //"0xded7fF8aA48c2Cf503d90B9b15f784cBf201f299"; //Version 4 Rinkeby, can purchase apps
@@ -72,7 +73,7 @@ export const DAPPSTORE_ABI = [{
         }],
         "name": "purchaseApp",
         "outputs": [],
-        "stateMutability": "nonpayable",
+        "stateMutability": "payable",
         "type": "function"
     },
     {
@@ -227,6 +228,9 @@ export const DAPPSTORE_ABI = [{
         "type": "function"
     }
 ]
+
+
+
 
 //Version 2
 // export const DAPPSTORE_ABI = [{

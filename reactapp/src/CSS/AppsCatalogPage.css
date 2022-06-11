@@ -76,13 +76,16 @@
     height: 20vw;
     overflow: hidden;
     transition: none;
-    color: white
+    color: white;
+    padding: 10px;
+    margin-top: 20px;
 }
 
 .featured-app-image {
     max-width: 40vw;
     max-height: 40vh;
     transition: none;
+    padding: 50px
 }
 
 .featured-app-tile:hover .featured-app-image {

@@ -71,7 +71,7 @@ export async function getOwnedApps() {
     );
     console.log("Fetching owned apps");
     let ownedApps = await contract.methods
-      .getPurchasedApps(await getCurrAccount())
+      .getPurchasedAppsInfo(await getCurrAccount())
       .call()
       .then((res: any) => {
         console.log("getOwnedApps returned = ", res);
@@ -318,11 +318,7 @@ const fetchDisplayedApps = async (
     DAPPSTORE_ABI,
     DAPPSTORE_CONTRACT_ADDRESS
   );
-  console.log(
-    `from: ${currPageNum * itemsPerPage}, to: ${
-      currPageNum * itemsPerPage + itemsPerPage
-    }`
-  );
+  console.log(`fetchDisplayedApp: from: ${currPageNum * itemsPerPage}, to: ${currPageNum * itemsPerPage + itemsPerPage}`);
 
 
   // contract.methods.createXApps(1).send({ from: await getCurrAccount()}).then( () => {
@@ -418,6 +414,7 @@ export async function getFeaturedApp() : Promise<AppData|undefined> {
 
       //dummy call to get length quick and very very dirty
     const totalNumOfApps = await getTotalNumOfApps() //TODO: CHANGE THIS
+    console.log("Features Num Of Apps: ", totalNumOfApps)
     const featuredAppRandomness: number =  Math.ceil((Math.random() * totalNumOfApps)) % totalNumOfApps;//TODO: Change
     const featuresApp = (await fetchDisplayedApps(1, featuredAppRandomness, undefined, undefined)).displayedApps[0];
     console.log("Featured app: ", featuresApp);
