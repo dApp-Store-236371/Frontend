@@ -12,7 +12,8 @@ import no_image_alt from "../../../Misc/app_no_image_alt.jpg";
 import dummy_car from "../../../Misc/product_img/Audi_R8_2017_189_19_610_52_10_76_48_174_14_AWD_2_2_2dr_nUS.jpg";
 import AppData from "../AppData";
 import "../../../CSS/appImage.css";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { checkImage } from "../../Shared/utils";
 
 interface AppTileProps {
   appData: AppData;
@@ -26,6 +27,23 @@ function AppTile({
   setSelectedAppData,
 }: AppTileProps) {
   //console.log("AppTile: AppData = ", appData)
+
+  const [imgSrc, setImgSrc] = useState(no_image_alt);
+
+
+
+  useEffect(() => {
+
+    checkImage(appData.img_url).then(res => {
+      console.log(res)
+      if(appData.img_url!==undefined && res){
+        setImgSrc(appData.img_url)
+      }
+      else{
+        setImgSrc(no_image_alt)
+      }
+    })
+  }, [appData])
 
   const handleShowDetails = () => {
     setSelectedAppData(appData);
@@ -51,7 +69,7 @@ function AppTile({
       >
         <div className={"card_image_div"}>
           <MDBCardImage
-            src={appData.img_url ? appData.img_url : no_image_alt}
+            src={imgSrc}
             position="top"
             alt="..."
 

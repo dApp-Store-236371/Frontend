@@ -412,7 +412,7 @@ export async function getFeaturedApp() : Promise<AppData|undefined> {
 
       //dummy call to get length quick and very very dirty
     const totalNumOfApps = await getTotalNumOfApps() //TODO: CHANGE THIS
-    const featuredAppRandomness: number =  Math.ceil((Math.random() * 100000)) % totalNumOfApps;//TODO: Change
+    const featuredAppRandomness: number =  Math.ceil((Math.random() * totalNumOfApps)) % totalNumOfApps;//TODO: Change
     const featuresApp = (await fetchDisplayedApps(1, featuredAppRandomness, undefined, undefined)).displayedApps[0];
     console.log("Featured app: ", featuresApp);
     return featuresApp;

@@ -174,3 +174,14 @@ export interface TorrentData {
 }
 
 // export type AppDataWithTorrent = AppData & TorrentData;
+
+export   async function checkImage(url: string|undefined){
+  if(url===undefined){
+   return
+ }
+ const res = await fetch(url);
+ const buff = await res.blob();
+ console.log("BUFF: ", buff)
+ return buff.type.startsWith('image/')
+
+} 
