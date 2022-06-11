@@ -326,11 +326,7 @@ const fetchDisplayedApps = async (
 
   // const random_offset = 3;
 
-  const  totalNumOfApps = await contract.methods.getAppCount().call()
-  .catch((error: any) => {
-    console.log("ERROR in getContractValue", error);
-    return  0
-  })
+  const  totalNumOfApps = await getTotalNumOfApps()
   
   const numberOfPages =  Math.ceil(totalNumOfApps / itemsPerPage);
   const appsOnLastPage = totalNumOfApps % itemsPerPage;
@@ -395,13 +391,27 @@ const fetchDisplayedApps = async (
 
 };
 
+export async function getTotalNumOfApps() {
+  let contract = await createContract(
+    DAPPSTORE_ABI,
+    DAPPSTORE_CONTRACT_ADDRESS
+  );
+  return await contract.methods.getAppCount()
+                                .call()
+                                .catch((error: any) => {
+                                  console.log("ERROR in getContractValue", error);
+                                  return  0
+                                  });
+  
+}
+
 export async function getFeaturedApp() : Promise<AppData|undefined> {
     //TODO: fetch number of apps, and then an app randomly.
     try{
     console.log("Fetching features app")
 
       //dummy call to get length quick and very very dirty
-      const totalNumOfApps = 10 //TODO: CHANGE THIS
+    const totalNumOfApps = await getTotalNumOfApps() //TODO: CHANGE THIS
     const featuredAppRandomness: number =  Math.ceil((Math.random() * 100000)) % totalNumOfApps;//TODO: Change
     const featuresApp = (await fetchDisplayedApps(1, featuredAppRandomness, undefined, undefined)).displayedApps[0];
     console.log("Featured app: ", featuresApp);

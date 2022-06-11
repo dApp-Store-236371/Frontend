@@ -10,30 +10,30 @@ interface FeaturedAppsTileProps{
     toggleShowModal: any;
     setSelectedAppData: any;
     provider: any
+    featuredApp: AppData | undefined;
 }
 
 export function FeaturedAppsTile(props: FeaturedAppsTileProps){
 
-    const [featuredApp, setFeaturedApp] = useState<AppData | undefined >(undefined);
+    // const [featuredApp, setFeaturedApp] = useState<AppData | undefined >(undefined);
     
-    useEffect( () => {
-        console.log("provider changed")
-        const updateFeaturedApp = async () => {
-            // const newFeaturedApp = await getFeaturedApp();
-            
-            // setFeaturedApp(newFeaturedApp);
+    // useEffect( () => {
+    //     console.log("provider changed")
+    //     const updateFeaturedApp = async () => {
+    //         const newFeaturedApp = await getFeaturedApp();
+    //         setFeaturedApp(newFeaturedApp);
 
-        }
+    //     }
 
-        updateFeaturedApp();
-    }, [props.provider ])
+    //     updateFeaturedApp();
+    // }, [props.provider ])
     
     const handleShowDetails = () => {
-        props.setSelectedAppData(featuredApp);
+        props.setSelectedAppData(props.featuredApp);
         props.toggleShowModal();
       };
 
-    if(!featuredApp){
+    if(!props.featuredApp){
         return null;
     }
 
@@ -64,7 +64,7 @@ export function FeaturedAppsTile(props: FeaturedAppsTileProps){
       >
         <div className={"card_image_div"}>
           <MDBCardImage
-            src={featuredApp.img_url ? featuredApp.img_url : no_image_alt}
+            src={props.featuredApp.img_url ? props.featuredApp.img_url : no_image_alt}
             position="top"
             alt="..."
             className={"featured-app-image"}
@@ -87,14 +87,14 @@ export function FeaturedAppsTile(props: FeaturedAppsTileProps){
         
         }}
       >
-        <MDBCardTitle>{featuredApp.name}</MDBCardTitle>
-          <h6 id="category-paragraph-title">{`Category: ${featuredApp.category}`}</h6>
-          <h6 id="category-paragraph-title">{`Price: ${featuredApp.price} Wei`}</h6>
+        <MDBCardTitle>{props.featuredApp.name}</MDBCardTitle>
+          <h6 id="category-paragraph-title">{`Category: ${props.featuredApp.category}`}</h6>
+          <h6 id="category-paragraph-title">{`Price: ${props.featuredApp.price} Wei`}</h6>
 
           <MDBCardText style={{
 
 
-          }}>{featuredApp.description}</MDBCardText>
+          }}>{props.featuredApp.description}</MDBCardText>
       </MDBCardBody>
 
       <MDBBtn

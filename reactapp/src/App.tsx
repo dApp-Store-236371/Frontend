@@ -21,7 +21,7 @@ import { LoginModal } from "./Pages/LoginPage/LoginModal";
 
 import Web3 from "web3";
 import { Web3TestPage } from "./Web3Communication/Web3TestPage";
-import { uploadDummyApps } from "./Web3Communication/Web3ReactApi";
+import { getFeaturedApp, uploadDummyApps } from "./Web3Communication/Web3ReactApi";
 import { web3 } from "./Web3Communication/Web3Init";
 import { SettingsModal } from "./Pages/Shared/SettingsModal";
 import { StatusPage } from "./Pages/StatusPage/StatusPage";
@@ -67,7 +67,19 @@ function App() {
   const [defaultPath, setDefaultPath] = useState<string>("C:\\daapstoreDownloads");
 
   const [activeTorrents, setActiveTorrents] = useState<TorrentData[]>([]);
-  
+
+  const [featuredApp, setFeaturedApp] = useState<AppData | undefined >(undefined);
+    
+  useEffect( () => {
+      console.log("provider changed")
+      const updateFeaturedApp = async () => {
+          const newFeaturedApp = await getFeaturedApp();
+          setFeaturedApp(newFeaturedApp);
+
+      }
+
+      updateFeaturedApp();
+  }, [provider])
 
   //update electron about account change
   useEffect(() => {
@@ -172,6 +184,7 @@ function App() {
                 activeTorrents={activeTorrents}
                 provider={provider}
                 downloadPath={defaultPath}
+                featuredApp={featuredApp}
 
               />
             }

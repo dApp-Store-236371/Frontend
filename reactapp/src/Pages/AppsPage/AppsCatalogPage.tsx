@@ -22,6 +22,7 @@ interface AppsCatalogPageProps {
   activeTorrents: Array<TorrentData>;
   provider: any;
   downloadPath: string;
+  featuredApp: AppData | undefined;
 }
 
 function AppsCatalogPage(props: AppsCatalogPageProps) {
@@ -69,6 +70,7 @@ function AppsCatalogPage(props: AppsCatalogPageProps) {
           toggleShowModal={toggleShowModal}
           setSelectedAppData={setSelectedAppData}
           provider={props.provider}
+          featuredApp = {props.featuredApp}
         />
       </div>
       <div id="pagination-div">
