@@ -9,7 +9,7 @@
     "url": "http://barnyrubble.tumblr.com/"
   },
   "scripts": {
-    "start": "react-app-rewired start",
+    "start": "npm run build",
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject",
