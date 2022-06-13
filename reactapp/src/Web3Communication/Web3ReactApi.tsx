@@ -332,17 +332,18 @@ const fetchDisplayedApps = async (
   
   const numberOfPages =  Math.ceil(totalNumOfApps / itemsPerPage);
   const appsOnLastPage = totalNumOfApps % itemsPerPage;
-  // console.log("totalNumOfApps", totalNumOfApps);
-  // console.log("itemsPerPage", itemsPerPage);
-  // console.log("appsOnLastPage: ", appsOnLastPage);
+  console.log("totalNumOfApps", totalNumOfApps);
+  console.log("itemsPerPage", itemsPerPage);
+  console.log("appsOnLastPage: ", appsOnLastPage);
 
   let index: number = currPageNum * itemsPerPage;
   let to_index: number = Math.min(index + itemsPerPage, totalNumOfApps);
   let requested_len = itemsPerPage;
 
+
   if (currPageNum === numberOfPages-1) {
-    console.log("Last Page. appsOnLastPage: ", appsOnLastPage);
-      requested_len = appsOnLastPage;
+    console.log("Last Page. marking appsOnLastPage: ", Math.max(1,appsOnLastPage));
+      requested_len = Math.max(1,appsOnLastPage);
   }
 
   console.log("page: ", currPageNum)
@@ -413,9 +414,10 @@ export async function getFeaturedApp() : Promise<AppData|undefined> {
     console.log("Fetching features app")
 
       //dummy call to get length quick and very very dirty
-    const totalNumOfApps = await getTotalNumOfApps() //TODO: CHANGE THIS
-    console.log("Features Num Of Apps: ", totalNumOfApps)
-    const featuredAppRandomness: number =  Math.ceil((Math.random() * totalNumOfApps)) % totalNumOfApps;//TODO: Change
+    const totalNumOfApps = await getTotalNumOfApps() 
+    console.log("Featured App, total Num Of Apps: ", totalNumOfApps)
+    const featuredAppRandomness: number =  Math.floor((Math.random() * totalNumOfApps)) % totalNumOfApps;
+    console.log("Featured App, randomness: ", featuredAppRandomness)
     const featuresApp = (await fetchDisplayedApps(1, featuredAppRandomness, undefined, undefined)).displayedApps[0];
     console.log("Featured app: ", featuresApp);
     return featuresApp;
