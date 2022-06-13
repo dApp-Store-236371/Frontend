@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "homepage": "./",
   "private": true,
+  "engines": {
+    "node": "16.x"
+  },
   "author": {
     "name": "Carmel Hecht",
     "email": "hechtcarmel@campus.technion.ac.il",
