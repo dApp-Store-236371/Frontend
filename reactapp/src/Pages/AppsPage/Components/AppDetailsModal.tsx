@@ -11,18 +11,18 @@ import {
   MDBCardImage,
   MDBCardText,
 } from "mdb-react-ui-kit";
-import appData from "../AppData";
+import AppData from "../AppData";
 import no_image_alt from "../../../Misc/app_no_image_alt.jpg";
 import { Rating } from "react-simple-star-rating";
 import SpinnerButton from "@vlsergey/react-bootstrap-button-with-spinner";
 import isElectron from "is-electron";
 import "../../../CSS/appImage.css";
 import { toast } from "react-toastify";
-import { purchase } from "../../../Web3Communication/Web3ReactApi";
+import { purchase, rateApp } from "../../../Web3Communication/Web3ReactApi";
 import { checkImage, startDownload, TorrentData } from "../../Shared/utils";
 
 interface AppDetailsModalProps {
-  app: appData;
+  app: AppData;
   showModal: boolean;
   setShowModal: Dispatch<SetStateAction<boolean>>;
   toggleShowModal: any;
@@ -60,11 +60,16 @@ export default function AppDetailsModal({
   }, [app]);
 
   const handleRatingChanged = (newRating: number) => {
-    console.log(newRating);
+    console.log("New rating (GUI): ", newRating);
     //setRating(newRating);
-    app.myRating = newRating;
 
     //send to backend/blockchain.
+    rateApp(rating, newRating).then(success => {
+      if (success) {
+        setRating(newRating);
+        app.myRating = newRating;
+      }
+    })
   };
 
   function getMyRating() {

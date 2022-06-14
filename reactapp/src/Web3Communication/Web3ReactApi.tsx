@@ -308,9 +308,9 @@ export const updateApp = async (
     DAPPSTORE_ABI,
     DAPPSTORE_CONTRACT_ADDRESS
   );
-
+  const do_not_change_name = ""
   await contract.methods
-    .update(id, description, sha, img_url, magnetLink, price)
+    .updateApp(id,do_not_change_name, description,magnetLink,img_url, price, sha)
     .send({ from: await getCurrAccount() })
     .then(() => {
       console.log("Finished Updating");
@@ -341,20 +341,9 @@ const fetchDisplayedApps = async (
   );
   console.log(`fetchDisplayedApp: from: ${currPageNum * itemsPerPage}, to: ${currPageNum * itemsPerPage + itemsPerPage}`);
 
-
-  // contract.methods.createXApps(1).send({ from: await getCurrAccount()}).then( () => {
-  //   console.log("EEEEEEEEEEEEEB")
-  // }).catch( (err: any) => {
-  //   console.error("Error creating apps: ", err);
-  // })
   // const random_offset = 3;
 
   const  { index, requested_len, numberOfPages }: { index: number; requested_len: number; numberOfPages: number; } = await calcRequestedAppsRange(itemsPerPage, currPageNum);
-
-  // if requested_len === 0 {
-  //   console.log("No Apps to fetch");
-  //   return { displayedApps: [], pageCount: numberOfPages };
-  // }
 
   let appDatas = await contract.methods
     .getAppBatch(index , requested_len)
@@ -550,6 +539,44 @@ async function getFilteredAppsFromDB(offset: number, length: number, textFilter:
     return []
   }
 
+
+}
+
+
+export async function rateApp(appId: number, rated: number){
+  console.log("Rating app ", appId)
+
+  const contract = await createContract(
+    DAPPSTORE_ABI,
+    DAPPSTORE_CONTRACT_ADDRESS
+  );
+
+  rated = Math.min(Math.ceil(rated / 20), 5)
+
+  console.log("rated 1 to 5: ", rated)
+    try{
+      contract.methods.rateApp(appId, rated).send({ from: await getCurrAccount()})
+      return true
+    }
+    catch (err){
+      console.log("Error rating app: ", err);
+      toast.error("Could not rate app")
+      return false
+    }
+
+
+
+}
+
+export async function getAppRating(appId: number){
+  console.log("Getting Rating of app ", appId)
+
+  const contract = await createContract(
+    DAPPSTORE_ABI,
+    DAPPSTORE_CONTRACT_ADDRESS
+  );
+
+  
 
 }
 

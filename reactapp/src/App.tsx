@@ -103,7 +103,7 @@ function App() {
       activeTorrentsData = activeTorrentsData.map(torrentData => {
         const appData: AppData|undefined = ownedApps.find(app => app.magnetLink === torrentData.magnet);
         if(appData !== undefined){
-          console.log("Found app data for torrent: " + torrentData.magnet);
+          console.log("Found app data for torrent: " + torrentData.magnet, "id is " + appData.id)
           torrentData.appName = appData.name;
           torrentData.appId = appData.id;
         }
