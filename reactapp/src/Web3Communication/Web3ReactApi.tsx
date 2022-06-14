@@ -488,6 +488,7 @@ async function getFilteredAppsFromDB(offset: number, length: number, textFilter:
   const API_URL = 'https://db-dapp-store.herokuapp.com'
   // //const API_URL =  'http://127.0.0.1:5000'
   // const API_URL =  'http://127.0.0.1:5001'
+   //const API_URL =  'http://127.0.0.1:5002'
 
   textFilter = textFilter ? textFilter : "";
 
@@ -521,18 +522,19 @@ async function getFilteredAppsFromDB(offset: number, length: number, textFilter:
   }
   // await fetch(`${API_URL}/hello`, {method: "POST"})
   try{
-    const res = await fetch(`${API_URL}/apps/filtered/${offset}/${length}/${seletedRatingStr}/${selectedCategory}/${textFilter}`, {
-      method: "GET",
-      headers: {
-        // 'Accept': 'application/json'
-      },
-      mode: 'cors'
-    }
-
-    ).then(res => {
-      console.log("GOT RES")
-      return res.json()
-    });
+    const url = `${API_URL}/apps/filtered/${offset}/${length}/${seletedRatingStr}/${selectedCategory}/${textFilter}`
+    console.log("db request url: ", url)
+    const res = await fetch(url)
+ 
+    .then(res => {
+      console.log("getFilteredAppsFromDB: GOT RES, res: ", res);
+      if (res.status === 200) {
+        return res.json();
+      }
+      else{
+        throw new Error("Error in getFilteredAppsFromDB: " + res.status);
+      }
+    })
     const filteredApps: AppData[] = []
     for (let appId of res) {
       console.log("getFilteredAppsFromDB appId: ", appId);
