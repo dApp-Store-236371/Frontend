@@ -3,7 +3,7 @@ import AppsCatalog from "./Components/AppsCatalog";
 import "../../CSS/AppsCatalogPage.css";
 import AppData from "./AppData";
 import Pagination from "./Components/Pagination";
-import { APPS_PER_PAGE, DEFAULT_EMPTY_APP } from "../../ReactConstants";
+import { AppRatings, APPS_PER_PAGE, DEFAULT_EMPTY_APP } from "../../ReactConstants";
 import AppDetailsModal from "./Components/AppDetailsModal";
 import {
   getDisplayedApps,
@@ -23,6 +23,10 @@ interface AppsCatalogPageProps {
   provider: any;
   downloadPath: string;
   featuredApp: AppData | undefined;
+  useServer: boolean;
+  searchQuery: string;
+  selectedCategory: string;
+  selectedRating: AppRatings;
 }
 
 function AppsCatalogPage(props: AppsCatalogPageProps) {
@@ -38,8 +42,8 @@ function AppsCatalogPage(props: AppsCatalogPageProps) {
 
   //Display Dummy apps
   useEffect(() => {
-    getDisplayedApps(0, APPS_PER_PAGE, setDisplayedApps, setNumberOfPages, );
-  }, [props.currAccount]);
+    getDisplayedApps(0, APPS_PER_PAGE, setDisplayedApps, setNumberOfPages, props.useServer );
+  }, [props.currAccount, props.useServer]);
 
   const handlePageClick = (arg: { selected: number }) => {
     console.log("Clicked Page: ", arg.selected);
@@ -47,7 +51,11 @@ function AppsCatalogPage(props: AppsCatalogPageProps) {
       arg.selected,
       APPS_PER_PAGE,
       setDisplayedApps,
-      setNumberOfPages
+      setNumberOfPages,
+      props.useServer,
+      props.searchQuery,
+      props.selectedCategory,
+      props.selectedRating
     );
   };
 

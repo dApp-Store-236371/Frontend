@@ -33,18 +33,35 @@ interface NavigationBarProps {
   setNumberOfPages: Dispatch<SetStateAction<number>>;
   currAccount: string;
   setShowSettingsModal: Dispatch<SetStateAction<boolean>>;
+  useServer: boolean;
+  searchQuery: string;
+  setSearchQuery: Dispatch<SetStateAction<string>>;
+  selectedCategory: string;
+  setSelectedCategory: Dispatch<SetStateAction<string>>;
+  selectedRating: AppRatings;
+  setSelectedRating: Dispatch<SetStateAction<AppRatings>>;
+
 }
+
+
 
 export default function NavigationBar({
   setNumberOfPages,
   setDisplayedApps,
   currAccount,
-  setShowSettingsModal
+  setShowSettingsModal,
+  useServer,
+  searchQuery,
+  setSearchQuery,
+  selectedCategory,
+  setSelectedCategory,
+  selectedRating,
+  setSelectedRating,
+
+
 }: NavigationBarProps) {
   const location = useLocation();
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [selectedCategory, setSelectedCategory] = useState<string>(AppCategories.All)
-  const [selectedRating, setSelectedRating] = useState<AppRatings>(AppRatings.All)
+
 
   const handleSearchSubmit = async (event: FormEvent) => {
     event.preventDefault(); //Otherwise refreshes the page
@@ -54,9 +71,10 @@ export default function NavigationBar({
       APPS_PER_PAGE,
       setDisplayedApps,
       setNumberOfPages,
+      useServer,
       searchQuery,
       selectedCategory,
-      selectedRating
+      selectedRating,
     );
 
     //Reset the search query
@@ -70,6 +88,7 @@ export default function NavigationBar({
         APPS_PER_PAGE,
         setDisplayedApps,
         setNumberOfPages,
+        useServer,
         searchQuery,
         selectedCategory,
         selectedRating

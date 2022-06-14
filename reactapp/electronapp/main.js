@@ -92,6 +92,10 @@ ipcMain.handle(ElectronMessages.CREATE_MAGNET, async(event, ...args) => {
         const res = { success: false, magnet: undefined, sha: undefined, errorMsg: "" }
         const path = await getFilePath()
         res.sha = await getSHA256(path)
+        res.sha = "COOL SHA"
+        if (res.sha === undefined) {
+            console.log("UNDEFFFFINED SHAAAA")
+        }
 
         if (!path || path === "") {
             console.log("No file selected")
@@ -119,7 +123,7 @@ ipcMain.handle(ElectronMessages.CREATE_MAGNET, async(event, ...args) => {
             path: path,
             sha: res.sha
         })
-
+        console.log("Returning successful torrent creating res: ", res)
         return res;
     } catch (err) {
         console.log("Electron CREATE_MAGNET Exception: ", err)

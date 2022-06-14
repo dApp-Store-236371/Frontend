@@ -11,7 +11,7 @@ import Footer from "./Pages/Shared/Footer";
 import SideNav from "./Pages/Shared/SideNav";
 import { IS_ON_ELECTRON } from "./ElectronCommunication/SharedElectronConstants";
 import UploadPage from "./Pages/UploadPage/UploadPage";
-import {AppCategories, PagePaths} from "./ReactConstants";
+import {AppCategories, AppRatings, PagePaths} from "./ReactConstants";
 import AppData from "./Pages/AppsPage/AppData";
 import PublishedPage from "./Pages/MyPublishedPage/PublishedPage";
 import { toast } from "react-toastify";
@@ -69,6 +69,11 @@ function App() {
   const [activeTorrents, setActiveTorrents] = useState<TorrentData[]>([]);
 
   const [featuredApp, setFeaturedApp] = useState<AppData | undefined >(undefined);
+  const [useServer, setUseServer] = useState<boolean>(true);
+
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string>(AppCategories.All)
+  const [selectedRating, setSelectedRating] = useState<AppRatings>(AppRatings.All)
     
   useEffect( () => {
       console.log("provider changed")
@@ -154,6 +159,8 @@ function App() {
               currAccount={currAccount}
               showModal={showSettingsModal}
               setShowModal={setShowSettingsModal}
+              setUseServer={setUseServer}
+              useServer={useServer}
         />
         {/* <button
           onClick={() => {
@@ -168,6 +175,14 @@ function App() {
           setDisplayedApps={setDisplayedApps}
           currAccount={currAccount}
           setShowSettingsModal={setShowSettingsModal}
+          useServer={useServer}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+          selectedRating={selectedRating}
+          setSelectedRating={setSelectedRating}
+  
         />
         <Routes>
           <Route
@@ -185,6 +200,11 @@ function App() {
                 provider={provider}
                 downloadPath={defaultPath}
                 featuredApp={featuredApp}
+                useServer={useServer}
+                searchQuery={searchQuery}
+                selectedCategory={selectedCategory}
+                selectedRating={selectedRating}
+                
 
               />
             }

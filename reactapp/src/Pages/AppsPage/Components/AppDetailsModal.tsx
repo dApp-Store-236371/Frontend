@@ -94,6 +94,8 @@ export default function AppDetailsModal({
             isLoading: false,
             autoClose: 5000,
           });
+          //TODO: refetch app data.
+          // const new_app_data = await fetchAppById(app.id);
         })
         .catch((error: any) => {
           toast.update(purchasingToastId, {
@@ -207,5 +209,4 @@ export default function AppDetailsModal({
     </>
   );
 }
-/*              <MDBBtn>Purchase</MDBBtn>
- */
+

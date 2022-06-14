@@ -1,7 +1,8 @@
 import { createContract } from "../Web3Utils";
 
 export const DAPPSTORE_CONTRACT_ADDRESS =
-    "0x5dEC735DbadF2Fb776DDab54af5f8ffC08BEfC7a"
+    "0x8988D01483428e183CdDA7103d8D7508D8FD6fBc"
+    // "0x5dEC735DbadF2Fb776DDab54af5f8ffC08BEfC7a"
     // "0x6a5B11650FA8187B35d9a792632e88C2f0Ad1A37"
     // "0x1F70E98Da4Cfc4695Fe6D764255CA084ac789BBd"
     //"0x4b41234D02E379400EfBEE11AB15797a6c0c82dA"
@@ -48,6 +49,11 @@ export const DAPPSTORE_ABI = [{
                 "internalType": "uint256",
                 "name": "_price",
                 "type": "uint256"
+            },
+            {
+                "internalType": "string",
+                "name": "_category",
+                "type": "string"
             },
             {
                 "internalType": "string",
@@ -132,6 +138,11 @@ export const DAPPSTORE_ABI = [{
                 {
                     "internalType": "string",
                     "name": "magnetLink",
+                    "type": "string"
+                },
+                {
+                    "internalType": "string",
+                    "name": "category",
                     "type": "string"
                 },
                 {
@@ -223,6 +234,11 @@ export const DAPPSTORE_ABI = [{
                     "type": "string"
                 },
                 {
+                    "internalType": "string",
+                    "name": "category",
+                    "type": "string"
+                },
+                {
                     "internalType": "uint256",
                     "name": "publishTime",
                     "type": "uint256"
@@ -300,6 +316,11 @@ export const DAPPSTORE_ABI = [{
                     "type": "string"
                 },
                 {
+                    "internalType": "string",
+                    "name": "category",
+                    "type": "string"
+                },
+                {
                     "internalType": "uint256",
                     "name": "publishTime",
                     "type": "uint256"
@@ -374,6 +395,11 @@ export const DAPPSTORE_ABI = [{
                 {
                     "internalType": "string",
                     "name": "magnetLink",
+                    "type": "string"
+                },
+                {
+                    "internalType": "string",
+                    "name": "category",
                     "type": "string"
                 },
                 {
