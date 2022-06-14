@@ -257,7 +257,9 @@ function App() {
               />
             }
           />
-          <Route path={PagePaths.StatusPagePath} element={<StatusPage activeTorrents={activeTorrents}/>} />
+
+            <Route path={PagePaths.StatusPagePath} element={<StatusPage activeTorrents={activeTorrents}/>} />
+
         </Routes>
         {/*Prevents footer to hide content */}
         <div

@@ -1,6 +1,7 @@
 import "../../CSS/SideNav.css";
 import { Link, NavLink } from "react-router-dom";
 import { PagePaths } from "../../ReactConstants";
+import isElectron from "is-electron";
 
 export default function SideNav() {
   return (
@@ -107,7 +108,7 @@ export default function SideNav() {
               </div>
             </NavLink>
           </li>
-
+            {isElectron() && (
           <li className="sidenav-item">
             <NavLink
               to="/upload"
@@ -143,7 +144,7 @@ export default function SideNav() {
               </div>
             </NavLink>
           </li>
-
+              )}
           <li className="sidenav-item">
             <NavLink
               to="/published"
@@ -179,7 +180,7 @@ export default function SideNav() {
               </div>
             </NavLink>
           </li>
-
+            {isElectron() && (
           <li className="sidenav-item">
             <NavLink
               to="/status"
@@ -215,6 +216,7 @@ export default function SideNav() {
               </div>
             </NavLink>
           </li>
+            )}
 
           <li className="sidenav-item" id="themeButton">
             <div className="sidenav-link">
