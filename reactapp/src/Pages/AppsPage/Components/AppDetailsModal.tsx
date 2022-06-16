@@ -10,6 +10,10 @@ import {
   MDBModalFooter,
   MDBCardImage,
   MDBCardText,
+  MDBCarouselInner,
+  MDBCarousel,
+  MDBCarouselElement,
+  MDBCarouselItem,
 } from "mdb-react-ui-kit";
 import AppData from "../AppData";
 import no_image_alt from "../../../Misc/app_no_image_alt.jpg";
@@ -53,7 +57,8 @@ export default function AppDetailsModal({
   };
 
   useEffect(() => {
-    setRating(app.myRating === undefined ? 0 : app.myRating);
+    console.log("Setting rating to " + (app.myRating === undefined ? 0 : app.myRating*20));
+    setRating(app.myRating === undefined ? 0 : app.myRating*20);
     setOwnedStateState(app.owned);
     checkImage(app.img_url);
     console.log("AppDetailsModal: image: ", app.img_url);
@@ -64,7 +69,7 @@ export default function AppDetailsModal({
     //setRating(newRating);
 
     //send to backend/blockchain.
-    rateApp(rating, newRating).then(success => {
+    rateApp(app.id, newRating).then(success => {
       if (success) {
         setRating(newRating);
         app.myRating = newRating;
@@ -152,6 +157,22 @@ export default function AppDetailsModal({
     }
   };
 
+  function getCarouselItems() {
+    const images: Array<string> = Array.isArray(app.img_url) ? app.img_url : [app.img_url];//, "https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png"
+    console.log("getCarouselItems images: ", images);
+    return images.map((img_url, index) => {
+      let activeClassname = undefined
+      if (index === 0){
+        activeClassname = "active"
+      }
+      return(
+      <MDBCarouselItem key={"item" + index.toString() + img_url} className={activeClassname}>
+        <MDBCarouselElement className="app-image" key={"elem" + index.toString() + img_url} src={img_url} alt={no_image_alt} />
+      </MDBCarouselItem>
+      )
+    })
+  }
+
   return (
     <>
       <MDBModal
@@ -178,11 +199,18 @@ export default function AppDetailsModal({
             </MDBModalHeader>
             <MDBModalBody>
 
-              <MDBCardImage
+              {/* <MDBCardImage
                 src={app.img_url ? app.img_url : no_image_alt}
                 alt="..."
                 className="app-image"
-              />
+              /> */}
+            <MDBCarousel showIndicators showControls fade>
+             <MDBCarouselInner>
+              {
+                getCarouselItems()
+              }
+              </MDBCarouselInner>
+            </MDBCarousel>
               <h4 id="description-paragraph-title">Description:</h4>
 
 
@@ -199,7 +227,7 @@ export default function AppDetailsModal({
                 <h6 id="category-paragraph-modal-elem">{`Category`}  <br/> {app.category}</h6>
                 <h6 id="category-paragraph-modal-elem">{`Price`} <br/>{app.price} Wei</h6>
                 <h6 id="category-paragraph-modal-elem">{`Developer`} <br/> {app.company} </h6>
-                <h6 id="category-paragraph-modal-elem">{`Rating`} <br/> {app.rating == -1 ? "Not Rated" : app.rating}</h6>
+                <h6 id="category-paragraph-modal-elem">{`Rating`} <br/> {app.rating === 0 ? "Not Rated" : (app.rating)}</h6>
               </div>
               <hr />
               <SpinnerButton onClick={handlePurchseOrDownloadBtn}

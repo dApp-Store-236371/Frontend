@@ -1,7 +1,9 @@
 import { createContract } from "../Web3Utils";
 
 export const DAPPSTORE_CONTRACT_ADDRESS =
-    "0x257ADdF7726536Ada2De43b06f1dD57AEc5A477C"
+    "0xe9CA6C1bE79CCaC8bC60f04114270aCcF398FA70"
+    //"0x2f10dD9bB53061456Ca41E0275c72A37E709B5eD"
+    //"0x257ADdF7726536Ada2De43b06f1dD57AEc5A477C"
 
 //"0x8988D01483428e183CdDA7103d8D7508D8FD6fBc"
 // "0x5dEC735DbadF2Fb776DDab54af5f8ffC08BEfC7a"
@@ -184,17 +186,22 @@ export const DAPPSTORE_ABI = [{
                 },
                 {
                     "internalType": "uint256",
-                    "name": "num_ratings",
+                    "name": "numRatings",
                     "type": "uint256"
                 },
                 {
                     "internalType": "uint256",
-                    "name": "rating",
+                    "name": "ratingInt",
                     "type": "uint256"
                 },
                 {
                     "internalType": "uint256",
-                    "name": "rating_modulu",
+                    "name": "ratingModulu",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "userRating",
                     "type": "uint256"
                 },
                 {
@@ -303,17 +310,22 @@ export const DAPPSTORE_ABI = [{
                 },
                 {
                     "internalType": "uint256",
-                    "name": "num_ratings",
+                    "name": "numRatings",
                     "type": "uint256"
                 },
                 {
                     "internalType": "uint256",
-                    "name": "rating",
+                    "name": "ratingInt",
                     "type": "uint256"
                 },
                 {
                     "internalType": "uint256",
-                    "name": "rating_modulu",
+                    "name": "ratingModulu",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "userRating",
                     "type": "uint256"
                 },
                 {
@@ -385,17 +397,22 @@ export const DAPPSTORE_ABI = [{
                 },
                 {
                     "internalType": "uint256",
-                    "name": "num_ratings",
+                    "name": "numRatings",
                     "type": "uint256"
                 },
                 {
                     "internalType": "uint256",
-                    "name": "rating",
+                    "name": "ratingInt",
                     "type": "uint256"
                 },
                 {
                     "internalType": "uint256",
-                    "name": "rating_modulu",
+                    "name": "ratingModulu",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "userRating",
                     "type": "uint256"
                 },
                 {
@@ -467,17 +484,22 @@ export const DAPPSTORE_ABI = [{
                 },
                 {
                     "internalType": "uint256",
-                    "name": "num_ratings",
+                    "name": "numRatings",
                     "type": "uint256"
                 },
                 {
                     "internalType": "uint256",
-                    "name": "rating",
+                    "name": "ratingInt",
                     "type": "uint256"
                 },
                 {
                     "internalType": "uint256",
-                    "name": "rating_modulu",
+                    "name": "ratingModulu",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "userRating",
                     "type": "uint256"
                 },
                 {
@@ -509,6 +531,21 @@ export const DAPPSTORE_ABI = [{
             "internalType": "struct AppInfoLibrary.AppInfo[]",
             "name": "",
             "type": "tuple[]"
+        }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [{
+            "internalType": "uint256",
+            "name": "_app_id",
+            "type": "uint256"
+        }],
+        "name": "getUserRatingForApp",
+        "outputs": [{
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
         }],
         "stateMutability": "view",
         "type": "function"

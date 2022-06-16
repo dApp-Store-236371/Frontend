@@ -11,9 +11,7 @@ import {
 } from "./Contracts/dAppContract";
 import { Dispatch, SetStateAction } from "react";
 import {AppCategories, AppRatings} from "../ReactConstants";
-import { bool, boolean } from "yup";
 import { ratingEnumToNumber } from "../Pages/Shared/utils";
-import App from "../App";
 import { toast } from "react-toastify";
 
 export async function getPublishedApps() {
@@ -32,7 +30,10 @@ export async function getPublishedApps() {
       .then((res: any) => {
         console.log("getPublishedApps returned = ", res);
         let publishedApps: Array<AppData> = [];
+        
         res.forEach((solidityStruct: any) => {
+          const rating = calcRating(solidityStruct.numRatings, solidityStruct.ratingInt, solidityStruct.ratingModulu);
+
           let app: AppData = {
             id: solidityStruct.id,
             name: solidityStruct.name,
@@ -41,13 +42,14 @@ export async function getPublishedApps() {
             company: solidityStruct.company,
             img_url: solidityStruct.imgUrl,
             owned: solidityStruct.owned,
-            rating: solidityStruct.rating,
+            rating: rating,
             SHA: solidityStruct.fileSha256,
             version: 1,
             publication_date: "1.1.1",
             published: solidityStruct.creator === getCurrAccount(),
             category: AppCategories.Games,
             magnetLink: solidityStruct.magnetLink,
+            myRating: solidityStruct.userRating,
           };
           publishedApps.push(app);
         });
@@ -78,8 +80,11 @@ export async function getOwnedApps() {
       .call({from: await getCurrAccount()})
       .then((res: any) => {
         console.log("getOwnedApps returned = ", res);
+
         let ownedApps: Array<AppData> = [];
         res.forEach((solidityStruct: any) => {
+          const rating = calcRating(solidityStruct.numRatings, solidityStruct.ratingInt, solidityStruct.ratingModulu);
+
           let app: AppData = {
             id: solidityStruct.id,
             name: solidityStruct.name,
@@ -88,13 +93,14 @@ export async function getOwnedApps() {
             company: solidityStruct.company,
             img_url: solidityStruct.imgUrl,
             owned: solidityStruct.owned,
-            rating: solidityStruct.rating,
+            rating: rating,
             SHA: solidityStruct.fileSha256,
             version: 1,
             publication_date: "1.1.1",
             published: solidityStruct.creator === getCurrAccount(),
             category: AppCategories.Games,
-            magnetLink: solidityStruct.magnetLink
+            magnetLink: solidityStruct.magnetLink,
+            myRating: solidityStruct.userRating,
           };
           ownedApps.push(app);
         });
@@ -146,7 +152,7 @@ export const getDisplayedApps = async (
         appsToDisplay = await getFilteredAppsFromDB(index, requested_len, textFilter, selectedCategory, selectedRating);
       }
       else{
-        appsToDisplay = await res.displayedApps.filter( (app) => {
+          appsToDisplay = await res.displayedApps.filter( (app) => {
           return appSatisfiesFilters(app, textFilter, selectedCategory, selectedRating);
       })
       }
@@ -353,6 +359,10 @@ const fetchDisplayedApps = async (
       
       let appsToDisplay: Array<AppData> = [];
       res.forEach((solidityStruct: any) => {
+        console.log("Type of num price (app batch): ",  typeof(solidityStruct.price));
+        const rating = calcRating(solidityStruct.numRatings, solidityStruct.ratingInt, solidityStruct.ratingModulu);
+        console.log("rating: ", rating);
+        console.log("my rating: ", solidityStruct.userRating);
         let app: AppData = {
           id: solidityStruct.id,
           name: solidityStruct.name,
@@ -361,13 +371,15 @@ const fetchDisplayedApps = async (
           company: solidityStruct.company,
           img_url: solidityStruct.imgUrl,
           owned: solidityStruct.owned,
-          rating: solidityStruct.rating,
+          rating: rating,
           SHA: solidityStruct.fileSha256,
           version: 1,
           publication_date: "1.1.1",
           published: solidityStruct.creator === getCurrAccount(),
           category: solidityStruct.category ? solidityStruct.category : AppCategories.Games,
           magnetLink: solidityStruct.magnetLink,
+          myRating: solidityStruct.userRating,
+
         };
         appsToDisplay.push(app);
       });
@@ -379,16 +391,30 @@ const fetchDisplayedApps = async (
       return  []
     });
 
-
-
-  
-
-  
   console.log("res= ", appDatas);
   console.log("pageCount: ", numberOfPages)
   return { displayedApps: appDatas, pageCount: numberOfPages };
 
 };
+
+
+function calcRating(numRatings: number, ratingInt: number, ratingModulu: number){
+  console.log("calcRating params: ", "numRating: ", numRatings, "ratingInt ", ratingInt, "ratingModulo ",ratingModulu);
+  console.log("Num rating type: ", typeof numRatings);
+
+
+  numRatings= parseInt(numRatings.toString())
+  ratingInt= parseInt(ratingInt.toString())
+  ratingModulu= parseInt(ratingModulu.toString())
+
+  if(numRatings === 0){
+    console.log("calcRating returns zero")
+    return 0;
+  }
+
+  const rating = ratingInt + ratingModulu/numRatings
+  return rating;
+}
 
 async function calcRequestedAppsRange(itemsPerPage: number, currPageNum: number) {
   const totalNumOfApps = await getTotalNumOfApps();
@@ -554,8 +580,10 @@ export async function rateApp(appId: number, rated: number){
   rated = Math.min(Math.ceil(rated / 20), 5)
 
   console.log("rated 1 to 5: ", rated)
+  toast.info("Rating app... Don't forget to confirm the transaction in your wallet.")
     try{
-      contract.methods.rateApp(appId, rated).send({ from: await getCurrAccount()})
+      await contract.methods.rateApp(appId, rated).send({ from: await getCurrAccount()})
+      toast.success("Rating app successful!")
       return true
     }
     catch (err){
@@ -568,15 +596,8 @@ export async function rateApp(appId: number, rated: number){
 
 }
 
-export async function getAppRating(appId: number){
-  console.log("Getting Rating of app ", appId)
-
-  const contract = await createContract(
-    DAPPSTORE_ABI,
-    DAPPSTORE_CONTRACT_ADDRESS
-  );
 
   
 
-}
+
 
