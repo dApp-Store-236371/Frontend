@@ -1,7 +1,8 @@
 import { createContract } from "../Web3Utils";
 
 export const DAPPSTORE_CONTRACT_ADDRESS =
-    "0xe9CA6C1bE79CCaC8bC60f04114270aCcF398FA70"
+    "0xE6277ECb7E1097224D063Ecfaa011d16784c7BDC"
+    //"0xe9CA6C1bE79CCaC8bC60f04114270aCcF398FA70"
     //"0x2f10dD9bB53061456Ca41E0275c72A37E709B5eD"
     //"0x257ADdF7726536Ada2De43b06f1dD57AEc5A477C"
 
@@ -18,7 +19,13 @@ export const DAPPSTORE_CONTRACT_ADDRESS =
 //"0xa1879B8f434c0BE3ABb662A269F72496C7047d9E"; //GANACHE
 
 
+
 export const DAPPSTORE_ABI = [{
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    },
+    {
         "inputs": [{
                 "internalType": "string",
                 "name": "_name",
@@ -61,81 +68,6 @@ export const DAPPSTORE_ABI = [{
             }
         ],
         "name": "createNewApp",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [{
-            "internalType": "uint256",
-            "name": "app_id",
-            "type": "uint256"
-        }],
-        "name": "purchaseApp",
-        "outputs": [],
-        "stateMutability": "payable",
-        "type": "function"
-    },
-    {
-        "inputs": [{
-                "internalType": "uint256",
-                "name": "_app_id",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "new_rating",
-                "type": "uint256"
-            }
-        ],
-        "name": "rateApp",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "stateMutability": "nonpayable",
-        "type": "constructor"
-    },
-    {
-        "inputs": [{
-                "internalType": "uint256",
-                "name": "app_id",
-                "type": "uint256"
-            },
-            {
-                "internalType": "string",
-                "name": "_name",
-                "type": "string"
-            },
-            {
-                "internalType": "string",
-                "name": "_description",
-                "type": "string"
-            },
-            {
-                "internalType": "string",
-                "name": "_magnetLink",
-                "type": "string"
-            },
-            {
-                "internalType": "string",
-                "name": "_imgUrl",
-                "type": "string"
-            },
-            {
-                "internalType": "uint256",
-                "name": "_price",
-                "type": "uint256"
-            },
-            {
-                "internalType": "string",
-                "name": "_fileSha256",
-                "type": "string"
-            }
-        ],
-        "name": "updateApp",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -548,6 +480,76 @@ export const DAPPSTORE_ABI = [{
             "type": "uint256"
         }],
         "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [{
+            "internalType": "uint256",
+            "name": "app_id",
+            "type": "uint256"
+        }],
+        "name": "purchaseApp",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "inputs": [{
+                "internalType": "uint256",
+                "name": "_app_id",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "new_rating",
+                "type": "uint256"
+            }
+        ],
+        "name": "rateApp",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{
+                "internalType": "uint256",
+                "name": "app_id",
+                "type": "uint256"
+            },
+            {
+                "internalType": "string",
+                "name": "_name",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "_description",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "_magnetLink",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "_imgUrl",
+                "type": "string"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_price",
+                "type": "uint256"
+            },
+            {
+                "internalType": "string",
+                "name": "_fileSha256",
+                "type": "string"
+            }
+        ],
+        "name": "updateApp",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
     }
 ]
