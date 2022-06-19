@@ -11,8 +11,9 @@ import {
 } from "./Contracts/dAppContract";
 import { Dispatch, SetStateAction } from "react";
 import {AppCategories, AppRatings} from "../ReactConstants";
-import { bool, boolean } from "yup";
 import { ratingEnumToNumber } from "../Pages/Shared/utils";
+import { toast } from "react-toastify";
+import isElectron from "is-electron";
 
 export async function getPublishedApps() {
   if (IS_DEBUG) {
@@ -22,14 +23,18 @@ export async function getPublishedApps() {
       DAPPSTORE_ABI,
       DAPPSTORE_CONTRACT_ADDRESS
     );
-    console.log("Fetching owned apps");
+    console.log("Fetching Published apps");
     let res = await contract.methods
-      .getPublishedApps(await getCurrAccount())
-      .call()
+      // .getPublishedApps(await getCurrAccount())
+      .getPublishedAppsInfo()
+      .call({ from: await getCurrAccount() })
       .then((res: any) => {
         console.log("getPublishedApps returned = ", res);
         let publishedApps: Array<AppData> = [];
+        
         res.forEach((solidityStruct: any) => {
+          const rating = calcRating(solidityStruct.numRatings, solidityStruct.ratingInt, solidityStruct.ratingModulu);
+
           let app: AppData = {
             id: solidityStruct.id,
             name: solidityStruct.name,
@@ -38,13 +43,14 @@ export async function getPublishedApps() {
             company: solidityStruct.company,
             img_url: solidityStruct.imgUrl,
             owned: solidityStruct.owned,
-            rating: solidityStruct.rating,
+            rating: rating,
             SHA: solidityStruct.fileSha256,
             version: 1,
             publication_date: "1.1.1",
             published: solidityStruct.creator === getCurrAccount(),
             category: AppCategories.Games,
             magnetLink: solidityStruct.magnetLink,
+            myRating: solidityStruct.userRating,
           };
           publishedApps.push(app);
         });
@@ -70,12 +76,16 @@ export async function getOwnedApps() {
     );
     console.log("Fetching owned apps");
     let ownedApps = await contract.methods
-      .getPurchasedApps(await getCurrAccount())
-      .call()
+      // .getPurchasedAppsInfo(await getCurrAccount())
+      .getPurchasedAppsInfo()
+      .call({from: await getCurrAccount()})
       .then((res: any) => {
         console.log("getOwnedApps returned = ", res);
+
         let ownedApps: Array<AppData> = [];
         res.forEach((solidityStruct: any) => {
+          const rating = calcRating(solidityStruct.numRatings, solidityStruct.ratingInt, solidityStruct.ratingModulu);
+
           let app: AppData = {
             id: solidityStruct.id,
             name: solidityStruct.name,
@@ -84,13 +94,14 @@ export async function getOwnedApps() {
             company: solidityStruct.company,
             img_url: solidityStruct.imgUrl,
             owned: solidityStruct.owned,
-            rating: solidityStruct.rating,
+            rating: rating,
             SHA: solidityStruct.fileSha256,
             version: 1,
             publication_date: "1.1.1",
             published: solidityStruct.creator === getCurrAccount(),
             category: AppCategories.Games,
-            magnetLink: solidityStruct.magnetLink
+            magnetLink: solidityStruct.magnetLink,
+            myRating: solidityStruct.userRating,
           };
           ownedApps.push(app);
         });
@@ -116,9 +127,10 @@ export const getDisplayedApps = async (
   itemsPerPage: number,
   setDisplayedApps: Dispatch<SetStateAction<Array<AppData>>>,
   setNumberOfPages: Dispatch<SetStateAction<number>>,
+  useServer: boolean,
   textFilter?: string,
   selectedCategory?: string,
-  selectedRating?: AppRatings
+  selectedRating?: AppRatings,
 ) => {
   //request to fetch apps [(pageNum*itemsPerPage + 1), (pageNum*itemsPerPage + itemsPerPage) )
   let res: getDisplayedAppsObj;
@@ -127,18 +139,25 @@ export const getDisplayedApps = async (
     setDisplayedApps(res.displayedApps);
     setNumberOfPages(res.pageCount);
   } else {
-    res = await fetchDisplayedApps(itemsPerPage, pageNum, textFilter, selectedCategory);
+    res = await fetchDisplayedApps(itemsPerPage, pageNum);
 
     let appsToDisplay: AppData[] = [];
     if( (!selectedCategory || selectedCategory === AppCategories.All) && (!selectedRating || selectedRating === AppRatings.All) && (textFilter === "" || !textFilter)){ 
-      console.log("AAAA", textFilter, selectedCategory, selectedRating);
+      // console.log("AAAA", textFilter, selectedCategory, selectedRating);
       console.log("no filters: ", res.displayedApps)
       appsToDisplay = res.displayedApps;
     }
     else{
-      appsToDisplay = await res.displayedApps.filter( (app) => {
-                        return appSatisfiesFilters(app, textFilter, selectedCategory, selectedRating);
-                    })
+      if(useServer){
+        const  { index, requested_len, numberOfPages } = await calcRequestedAppsRange(itemsPerPage, pageNum);
+        appsToDisplay = await getFilteredAppsFromDB(index, requested_len, textFilter, selectedCategory, selectedRating);
+      }
+      else{
+          appsToDisplay = await res.displayedApps.filter( (app) => {
+          return appSatisfiesFilters(app, textFilter, selectedCategory, selectedRating);
+      })
+      }
+
   }
     console.log("filtered apps: ", appsToDisplay)
     setDisplayedApps(appsToDisplay);
@@ -247,8 +266,10 @@ export const uploadApp = async (
     DAPPSTORE_CONTRACT_ADDRESS
   );
 
+  console.log("params: ", name, magnetLink, description, company, img_url, price, sha, category);
+
   await contract.methods
-    .upload(name, description, sha, img_url, magnetLink, company, price)
+    .createNewApp(name, description, magnetLink, img_url, company, price,  category, sha)
     .send({ from: await getCurrAccount() })
     .then(() => {
       console.log("Finished Uploading");
@@ -267,7 +288,7 @@ export const purchase = async (id: number, price: number) => {
   );
 
   await contract.methods
-    .purchase(id)
+    .purchaseApp(id)
     .send({ from: await getCurrAccount(), value: price })
     .then(() => {
       console.log("Finished Purchasing");
@@ -294,9 +315,9 @@ export const updateApp = async (
     DAPPSTORE_ABI,
     DAPPSTORE_CONTRACT_ADDRESS
   );
-
+  const do_not_change_name = ""
   await contract.methods
-    .update(id, description, sha, img_url, magnetLink, price)
+    .updateApp(id,do_not_change_name, description,magnetLink,img_url, price, sha)
     .send({ from: await getCurrAccount() })
     .then(() => {
       console.log("Finished Updating");
@@ -307,33 +328,42 @@ export const updateApp = async (
     });
 };
 
+
+async function fetchAppById(id: number) {
+  const app_arr = await (await fetchDisplayedApps(1, id)).displayedApps;
+  if(app_arr.length === 0){
+    return null;
+  }
+  return app_arr[0];
+}
+
 const fetchDisplayedApps = async (
   itemsPerPage: number,
-  currPageNum: number,
-  filter?: string,
-  selectedCategory?: string
+  currPageNum: number
+
 ) => {
   let contract = await createContract(
     DAPPSTORE_ABI,
     DAPPSTORE_CONTRACT_ADDRESS
   );
-  console.log(
-    `from: ${currPageNum * itemsPerPage}, to: ${
-      currPageNum * itemsPerPage + itemsPerPage
-    }`
-  );
-  let from_index: number = currPageNum * itemsPerPage + 1;
-  let to_index: number = from_index + itemsPerPage;
-  let res = await contract.methods
-    .getApps(from_index, to_index, await getCurrAccount())
-    .call()
+  console.log(`fetchDisplayedApp: from: ${currPageNum * itemsPerPage}, to: ${currPageNum * itemsPerPage + itemsPerPage}`);
+
+  // const random_offset = 3;
+
+  const  { index, requested_len, numberOfPages }: { index: number; requested_len: number; numberOfPages: number; } = await calcRequestedAppsRange(itemsPerPage, currPageNum);
+
+  let appDatas = await contract.methods
+    .getAppBatch(index , requested_len)
+    .call({ from: await getCurrAccount() })
     .then((res: any) => {
       console.log("fetchDisplayedApps returned = ", res);
-      console.log("result returned apps array: ", res.result);
-      console.log("result returned totalNumOfApps: ", res.totalNumOfApps);
-
+      
       let appsToDisplay: Array<AppData> = [];
-      res.result.forEach((solidityStruct: any) => {
+      res.forEach((solidityStruct: any) => {
+        console.log("Type of num price (app batch): ",  typeof(solidityStruct.price));
+        const rating = calcRating(solidityStruct.numRatings, solidityStruct.ratingInt, solidityStruct.ratingModulu);
+        console.log("rating: ", rating);
+        console.log("my rating: ", solidityStruct.userRating);
         let app: AppData = {
           id: solidityStruct.id,
           name: solidityStruct.name,
@@ -342,27 +372,88 @@ const fetchDisplayedApps = async (
           company: solidityStruct.company,
           img_url: solidityStruct.imgUrl,
           owned: solidityStruct.owned,
-          rating: solidityStruct.rating,
+          rating: rating,
           SHA: solidityStruct.fileSha256,
           version: 1,
           publication_date: "1.1.1",
           published: solidityStruct.creator === getCurrAccount(),
-          category: AppCategories.Games,
+          category: solidityStruct.category ? solidityStruct.category : AppCategories.Games,
           magnetLink: solidityStruct.magnetLink,
+          myRating: solidityStruct.userRating,
+
         };
         appsToDisplay.push(app);
       });
-      let numberOfPages = Math.ceil(res.totalNumOfApps / itemsPerPage);
 
-      return { displayedApps: appsToDisplay, pageCount: numberOfPages };
+      return appsToDisplay
     })
     .catch((error: any) => {
-      console.log("ERROR in getContractValue", error);
-      return { displayedApps: [], pageCount: 1 };
+      console.error("ERROR in getContractValue", error);
+      return  []
     });
-  console.log("res= ", res);
-  return res;
+
+  console.log("res= ", appDatas);
+  console.log("pageCount: ", numberOfPages)
+  return { displayedApps: appDatas, pageCount: numberOfPages };
+
 };
+
+
+function calcRating(numRatings: number, ratingInt: number, ratingModulu: number){
+  console.log("calcRating params: ", "numRating: ", numRatings, "ratingInt ", ratingInt, "ratingModulo ",ratingModulu);
+  console.log("Num rating type: ", typeof numRatings);
+
+
+  numRatings= parseInt(numRatings.toString())
+  ratingInt= parseInt(ratingInt.toString())
+  ratingModulu= parseInt(ratingModulu.toString())
+
+  if(numRatings === 0){
+    console.log("calcRating returns zero")
+    return 0;
+  }
+
+  const rating = ratingInt + ratingModulu/numRatings
+  return rating;
+}
+
+async function calcRequestedAppsRange(itemsPerPage: number, currPageNum: number) {
+  const totalNumOfApps = await getTotalNumOfApps();
+
+  const numberOfPages = Math.ceil(totalNumOfApps / itemsPerPage);
+  const appsOnLastPage = totalNumOfApps % itemsPerPage;
+  console.log("totalNumOfApps", totalNumOfApps);
+  console.log("itemsPerPage", itemsPerPage);
+  console.log("appsOnLastPage: ", appsOnLastPage);
+
+  let index: number = currPageNum * itemsPerPage;
+  let requested_len = itemsPerPage;
+
+
+  if (currPageNum === numberOfPages - 1) {
+    console.log("Last Page. marking appsOnLastPage: ", Math.max(1, appsOnLastPage));
+    requested_len = Math.max(1, appsOnLastPage);
+  }
+
+  console.log("page: ", currPageNum);
+  console.log("index: ", index);
+  console.log("length: ", requested_len);
+  return { index, requested_len, numberOfPages };
+}
+
+export async function getTotalNumOfApps() {
+  let contract = await createContract(
+    DAPPSTORE_ABI,
+    DAPPSTORE_CONTRACT_ADDRESS
+  );
+  return await contract.methods.getAppCount()
+                                .call()
+                                .catch((error: any) => {
+                                  console.log("ERROR in getContractValue", error);
+                                  return  0
+                                  });
+  
+}
 
 export async function getFeaturedApp() : Promise<AppData|undefined> {
     //TODO: fetch number of apps, and then an app randomly.
@@ -370,9 +461,11 @@ export async function getFeaturedApp() : Promise<AppData|undefined> {
     console.log("Fetching features app")
 
       //dummy call to get length quick and very very dirty
-      const totalNumOfApps = 10 //TODO: CHANGE THIS
-    const featuredAppRandomness: number =  Math.ceil((Math.random() * 100000)) % totalNumOfApps;//TODO: Change
-    const featuresApp = (await fetchDisplayedApps(1, featuredAppRandomness, undefined, undefined)).displayedApps[0];
+    const totalNumOfApps = await getTotalNumOfApps() 
+    console.log("Featured App, total Num Of Apps: ", totalNumOfApps)
+    const featuredAppRandomness: number =  Math.floor((Math.random() * totalNumOfApps)) % totalNumOfApps;
+    console.log("Featured App, randomness: ", featuredAppRandomness)
+    const featuresApp = (await fetchDisplayedApps(1, featuredAppRandomness)).displayedApps[0];
     console.log("Featured app: ", featuresApp);
     return featuresApp;
 
@@ -407,3 +500,111 @@ export const getMagnetLink = async (appId: string) => {
       throw err;
     });
 }
+async function getFilteredAppsFromDB(offset: number, length: number, textFilter: string | undefined, selectedCategory: string|undefined, selectedRating: AppRatings | undefined): Promise<AppData[]> {
+  const API_URL = 'https://db-dapp-store.herokuapp.com'
+  // //const API_URL =  'http://127.0.0.1:5000'
+  // const API_URL =  'http://127.0.0.1:5001'
+   //const API_URL =  'http://127.0.0.1:5002'
+
+  textFilter = textFilter ? textFilter : "";
+
+  let seletedRatingStr = undefined
+  switch(selectedRating) {
+    case AppRatings.All:
+      seletedRatingStr = "0";
+      break;
+    case AppRatings.One:
+      seletedRatingStr = "1";
+      break;
+    case AppRatings.Two:
+      seletedRatingStr = "2";
+      break;
+    case AppRatings.Three:
+      seletedRatingStr = "3";
+      break;
+    case AppRatings.Four:
+      seletedRatingStr = "4";
+      break;
+    case AppRatings.Five:
+      seletedRatingStr = "5";
+      break;
+    default:
+      seletedRatingStr = "0";
+      break;
+  }
+
+  if (selectedCategory === AppCategories.All || selectedCategory === undefined || selectedCategory === "") {
+    selectedCategory = "ALL";
+  }
+  // await fetch(`${API_URL}/hello`, {method: "POST"})
+  try{
+    const url = `${API_URL}/apps/filtered/${offset}/${length}/${seletedRatingStr}/${selectedCategory}/${textFilter}`
+    console.log("db request url: ", url)
+    let fetchOptions  = {}
+    if(!isElectron()){
+      fetchOptions = {
+        mode: "cors",
+      }
+    }
+    const res = await fetch(url, fetchOptions)
+ 
+    .then(res => {
+      console.log("getFilteredAppsFromDB: GOT RES, res: ", res);
+      if (res.status === 200) {
+        return res.json();
+      }
+      else{
+        throw new Error("Error in getFilteredAppsFromDB: " + res.status);
+      }
+    })
+    const filteredApps: AppData[] = []
+    for (let appId of res) {
+      console.log("getFilteredAppsFromDB appId: ", appId);
+      filteredApps.push(await fetchAppById(appId));
+
+    }
+    console.log("Returning Filtered Apps: ", filteredApps)
+    return filteredApps;
+  }
+  catch(err){
+    console.log("Error fetching filtered apps: ", err);
+    toast.error("Server is not available. Disable server usage under 'Settings' or try again later.")
+    return []
+  }
+
+
+}
+
+
+export async function rateApp(appId: number, rated: number){
+  console.log("Rating app ", appId)
+
+  const contract = await createContract(
+    DAPPSTORE_ABI,
+    DAPPSTORE_CONTRACT_ADDRESS
+  );
+
+  rated = Math.min(Math.ceil(rated / 20), 5)
+
+  console.log("rated 1 to 5: ", rated)
+  toast.info("Rating app... Don't forget to confirm the transaction in your wallet.")
+    try{
+      await contract.methods.rateApp(appId, rated).send({ from: await getCurrAccount()})
+      toast.success("Rating app successful!")
+      return true
+    }
+    catch (err){
+      console.log("Error rating app: ", err);
+      toast.error("Could not rate app")
+      return false
+    }
+
+
+
+}
+
+
+  
+
+
+

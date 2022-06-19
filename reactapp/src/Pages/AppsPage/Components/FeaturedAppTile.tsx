@@ -5,35 +5,39 @@ import AppData from "../AppData";
 import "../../../CSS/AppsCatalogPage.css";
 import { MDBBtn, MDBCard, MDBCardBody, MDBCardImage, MDBCardText, MDBCardTitle, MDBRipple } from "mdb-react-ui-kit";
 import no_image_alt from "../../../Misc/app_no_image_alt.jpg";
+import { checkImage } from "../../Shared/utils";
 
 interface FeaturedAppsTileProps{
     toggleShowModal: any;
     setSelectedAppData: any;
     provider: any
+    featuredApp: AppData | undefined;
 }
 
 export function FeaturedAppsTile(props: FeaturedAppsTileProps){
+  const [imgSrc, setImgSrc] = useState(no_image_alt);
 
-    const [featuredApp, setFeaturedApp] = useState<AppData | undefined >(undefined);
-    
-    useEffect( () => {
-        console.log("provider changed")
-        const updateFeaturedApp = async () => {
-            const newFeaturedApp = await getFeaturedApp();
-            
-            setFeaturedApp(newFeaturedApp);
 
-        }
 
-        updateFeaturedApp();
-    }, [props.provider ])
-    
+  useEffect(() => {
+
+    checkImage(props.featuredApp?.img_url).then(res => {
+      console.log(res)
+      if(props.featuredApp?.img_url!==undefined && res){
+        setImgSrc(props.featuredApp?.img_url)
+      }
+      else{
+        setImgSrc(no_image_alt)
+      }
+    })
+  }, [props.featuredApp])
+
     const handleShowDetails = () => {
-        props.setSelectedAppData(featuredApp);
+        props.setSelectedAppData(props.featuredApp);
         props.toggleShowModal();
       };
 
-    if(!featuredApp){
+    if(!props.featuredApp){
         return null;
     }
 
@@ -43,7 +47,8 @@ export function FeaturedAppsTile(props: FeaturedAppsTileProps){
             
     <MDBCard
       shadow="3"
-      background="white"
+      background="primary"
+      border="primary"
       style={{
           display: "flex",
           flexDirection: "row",
@@ -52,7 +57,8 @@ export function FeaturedAppsTile(props: FeaturedAppsTileProps){
         padding: "5px",
         margin: "10px",
         width: "100%",
-        height: "20vw"
+        height: "20vw",
+        color: "white",
 
       }}
     >
@@ -64,7 +70,7 @@ export function FeaturedAppsTile(props: FeaturedAppsTileProps){
       >
         <div className={"card_image_div"}>
           <MDBCardImage
-            src={featuredApp.img_url ? featuredApp.img_url : no_image_alt}
+            src={imgSrc}
             position="top"
             alt="..."
             className={"featured-app-image"}
@@ -84,17 +90,18 @@ export function FeaturedAppsTile(props: FeaturedAppsTileProps){
           overflowY: "hidden",
           textOverflow: "ellipsis",
           width: "22rem",
+          color: "white",
         
         }}
       >
-        <MDBCardTitle>{featuredApp.name}</MDBCardTitle>
-          <h6 id="category-paragraph-title">{`Category: ${featuredApp.category}`}</h6>
-          <h6 id="category-paragraph-title">{`Price: ${featuredApp.price} Wei`}</h6>
+        <MDBCardTitle style={{  color: "white",}}>{props.featuredApp.name}</MDBCardTitle>
+          <h6 style={{color: "white",}} id="category-paragraph-title">{`Category: ${props.featuredApp.category}`}</h6>
+          <h6 style={{color: "white",}} id="category-paragraph-title">{`Price: ${props.featuredApp.price} Wei`}</h6>
 
           <MDBCardText style={{
+            color: "white",
 
-
-          }}>{featuredApp.description}</MDBCardText>
+          }}>{props.featuredApp.description}</MDBCardText>
       </MDBCardBody>
 
       <MDBBtn
@@ -102,6 +109,7 @@ export function FeaturedAppsTile(props: FeaturedAppsTileProps){
           marginTop: "20px",
           width: "200px",
           alignSelf: "center",
+          backgroundColor: "red"
         }}
         onClick={handleShowDetails}
         href="#"

@@ -33,6 +33,18 @@ export function PurchasedAppsTable({
   downloadPath,
 }: purchasedAppsTableProps) {
 
+  const getDownloadBtnTxt = (origApp: any) => {
+    console.log("getDownloadBtnTxt, origApp: ", origApp);
+    if (!isElectron()){
+      return (["Get Desktop Client",])
+    }
+    else if (activeTorrents.filter(t => ((t.appName === origApp.name) && (t.magnet !== origApp.magnetLink))).length > 0){
+      return ["Update"];
+    }
+    else{
+      return ["Download"];
+    }
+  }
 
   const columns = useMemo(
     () => [
@@ -94,16 +106,13 @@ export function PurchasedAppsTable({
         accessor: "action",
         Cell: (value: any) => (
           <div>
+            
             <MDBBtn
               size={"sm"}
               disabled={activeTorrents.filter(torrent => torrent.magnet === value.cell.row.original.magnetLink).length > 0}
               onClick={() => downloadBtnHandler(value.cell.row.original)}
             >
-              {isElectron()
-                ? ["Download"]
-                : [
-                    "Get Desktop Client",
-                  ]}
+              {getDownloadBtnTxt(value.cell.row.original)}
             </MDBBtn>
           </div>
         ),
@@ -137,7 +146,7 @@ export function PurchasedAppsTable({
   const { pageIndex, globalFilter } = state;
 
   const downloadBtnHandler = async (rowData: AppData) => {
-    if (isElectron() || true) {
+    if (isElectron()) {
       console.log("Row data to download: ", rowData);
       setSelectedAppData(rowData);
       // setShowModal(true);

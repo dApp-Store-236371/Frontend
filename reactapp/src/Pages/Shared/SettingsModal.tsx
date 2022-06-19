@@ -1,4 +1,4 @@
-import { MDBModal, MDBModalBody, MDBModalContent, MDBModalDialog, MDBModalFooter, MDBModalHeader, MDBModalTitle } from "mdb-react-ui-kit";
+import { MDBCheckbox, MDBModal, MDBModalBody, MDBModalContent, MDBModalDialog, MDBModalFooter, MDBModalHeader, MDBModalTitle } from "mdb-react-ui-kit";
 import { Dispatch, SetStateAction } from "react";
 
 
@@ -8,6 +8,8 @@ interface SettingsModal{
     currAccount: string;
     showModal: boolean;
     setShowModal: Dispatch<SetStateAction<boolean>>;
+    useServer: boolean;
+    setUseServer: Dispatch<SetStateAction<boolean>>;
     
 }
 
@@ -26,7 +28,6 @@ export function SettingsModal(props: SettingsModal){
                 <MDBModalTitle> Settings </MDBModalTitle>
             </MDBModalHeader>
             <MDBModalBody style={{
-
                         textAlign: "left",
                         }}>
             <h6 > {`Account: ${props.currAccount}`}</h6>
@@ -38,8 +39,15 @@ export function SettingsModal(props: SettingsModal){
                     <small id="defaultPathHelp" className="form-text text-muted">
                         This is the default path to which apps will be downloaded and from which they will be seeded on startup.
                     </small>
+                    {/* checkbox for using server */}
+
+                  
+                        
+
                     
                 </div>
+                <MDBCheckbox name='flexCheck' value='' id='flexCheckChecked' label='Use Server For Searches' defaultChecked 
+                   onChange={(e) => props.setUseServer(e.target.checked)} />
 
 
       

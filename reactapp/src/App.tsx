@@ -11,7 +11,7 @@ import Footer from "./Pages/Shared/Footer";
 import SideNav from "./Pages/Shared/SideNav";
 import { IS_ON_ELECTRON } from "./ElectronCommunication/SharedElectronConstants";
 import UploadPage from "./Pages/UploadPage/UploadPage";
-import {AppCategories, PagePaths} from "./ReactConstants";
+import {AppCategories, AppRatings, PagePaths} from "./ReactConstants";
 import AppData from "./Pages/AppsPage/AppData";
 import PublishedPage from "./Pages/MyPublishedPage/PublishedPage";
 import { toast } from "react-toastify";
@@ -21,7 +21,7 @@ import { LoginModal } from "./Pages/LoginPage/LoginModal";
 
 import Web3 from "web3";
 import { Web3TestPage } from "./Web3Communication/Web3TestPage";
-import { uploadDummyApps } from "./Web3Communication/Web3ReactApi";
+import { getFeaturedApp, uploadDummyApps } from "./Web3Communication/Web3ReactApi";
 import { web3 } from "./Web3Communication/Web3Init";
 import { SettingsModal } from "./Pages/Shared/SettingsModal";
 import { StatusPage } from "./Pages/StatusPage/StatusPage";
@@ -67,7 +67,24 @@ function App() {
   const [defaultPath, setDefaultPath] = useState<string>("C:\\daapstoreDownloads");
 
   const [activeTorrents, setActiveTorrents] = useState<TorrentData[]>([]);
-  
+
+  const [featuredApp, setFeaturedApp] = useState<AppData | undefined >(undefined);
+  const [useServer, setUseServer] = useState<boolean>(true);
+
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string>(AppCategories.All)
+  const [selectedRating, setSelectedRating] = useState<AppRatings>(AppRatings.All)
+    
+  useEffect( () => {
+      console.log("provider changed")
+      const updateFeaturedApp = async () => {
+          const newFeaturedApp = await getFeaturedApp();
+          setFeaturedApp(newFeaturedApp);
+
+      }
+
+      updateFeaturedApp();
+  }, [provider])
 
   //update electron about account change
   useEffect(() => {
@@ -86,7 +103,7 @@ function App() {
       activeTorrentsData = activeTorrentsData.map(torrentData => {
         const appData: AppData|undefined = ownedApps.find(app => app.magnetLink === torrentData.magnet);
         if(appData !== undefined){
-          console.log("Found app data for torrent: " + torrentData.magnet);
+          console.log("Found app data for torrent: " + torrentData.magnet, "id is " + appData.id)
           torrentData.appName = appData.name;
           torrentData.appId = appData.id;
         }
@@ -142,6 +159,8 @@ function App() {
               currAccount={currAccount}
               showModal={showSettingsModal}
               setShowModal={setShowSettingsModal}
+              setUseServer={setUseServer}
+              useServer={useServer}
         />
         {/* <button
           onClick={() => {
@@ -156,6 +175,14 @@ function App() {
           setDisplayedApps={setDisplayedApps}
           currAccount={currAccount}
           setShowSettingsModal={setShowSettingsModal}
+          useServer={useServer}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+          selectedRating={selectedRating}
+          setSelectedRating={setSelectedRating}
+  
         />
         <Routes>
           <Route
@@ -172,6 +199,12 @@ function App() {
                 activeTorrents={activeTorrents}
                 provider={provider}
                 downloadPath={defaultPath}
+                featuredApp={featuredApp}
+                useServer={useServer}
+                searchQuery={searchQuery}
+                selectedCategory={selectedCategory}
+                selectedRating={selectedRating}
+                
 
               />
             }
@@ -224,7 +257,9 @@ function App() {
               />
             }
           />
-          <Route path={PagePaths.StatusPagePath} element={<StatusPage activeTorrents={activeTorrents}/>} />
+
+            <Route path={PagePaths.StatusPagePath} element={<StatusPage activeTorrents={activeTorrents}/>} />
+
         </Routes>
         {/*Prevents footer to hide content */}
         <div

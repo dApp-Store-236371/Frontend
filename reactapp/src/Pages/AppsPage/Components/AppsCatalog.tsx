@@ -10,6 +10,7 @@ interface AppsCatalogProps {
   toggleShowModal: any;
   setSelectedAppData: any;
   provider: any;
+  featuredApp: AppData | undefined;
 }
 function AppsCatalog(props: AppsCatalogProps) {
   return (
@@ -19,6 +20,7 @@ function AppsCatalog(props: AppsCatalogProps) {
           toggleShowModal={props.toggleShowModal}
           setSelectedAppData={props.setSelectedAppData}
           provider={props.provider}
+          featuredApp={props.featuredApp}
            />
     <div id="apps-catalog-warpper">
       {props.displayedApps.map((appData) => (

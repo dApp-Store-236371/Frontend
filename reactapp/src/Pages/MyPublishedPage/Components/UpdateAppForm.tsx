@@ -17,6 +17,7 @@ import "../../../CSS/UpdateAppForm.css";
 import FallbackImg from "../../../Misc/fix-invalid-image-error.png";
 import { toast } from "react-toastify";
 import { updateApp } from "../../../Web3Communication/Web3ReactApi";
+import { createMagnetLink } from "../../Shared/utils";
 
 interface UpdateFormProps {
   currAppData: AppData;
@@ -54,7 +55,7 @@ export default function UpdateForm({
     enableReinitialize: true,
     validateOnBlur: false,
     initialValues: {
-      appFile: "",
+
       price: currAppData.price.toString(),
       description: currAppData.description,
       img_url: currAppData.img_url,
@@ -62,7 +63,6 @@ export default function UpdateForm({
       name: currAppData.name,
     },
     validationSchema: Yup.object({
-      appFile: Yup.mixed().required("File is required"),
       price: Yup.number()
         .required("Must type number!")
         .moreThan(0, "Price must be greater than 0!")
@@ -89,28 +89,41 @@ export default function UpdateForm({
       let updateToastId = toast.loading(`Updating ${values.name}...`, {
         autoClose: false,
       });
-      //createTorrent(values.appFile);
-      //.then ( (results from electron which include magnet link & SHA) => {
-
-      updateApp(
-        values.id,
-        "PLACEHOLDER UPDATED MAGNET",
-        values.description,
-        values.img_url,
-        values.price,
-        "PLACEHOLDER UPDATED SHA"
-      )
-        .then(() => {
-          toast.update(updateToastId, {
-            render: `Updated ${values.name}!`,
-            type: "success",
-            isLoading: false,
-            autoClose: 5000,
+      createMagnetLink().then((res) => {
+        const [magnet, sha] = res
+        console.log("Update app: new magnet is ", magnet, " .new sha is ", sha)
+        updateApp(
+          values.id,
+          magnet,
+          values.description,
+          values.img_url,
+          values.price,
+          sha
+        )
+          .then(() => {
+            toast.update(updateToastId, {
+              render: `Updated ${values.name}!`,
+              type: "success",
+              isLoading: false,
+              autoClose: 5000,
+            });
+          })
+          .catch((error: any) => {
+            toast.update(updateToastId, {
+              render: `Failed to update :(`,
+              type: "error",
+              isLoading: false,
+              autoClose: 5000,
+            });
+            console.log(error);
+          })
+          .finally(() => {
+            setIsUploading(false);
           });
         })
         .catch((error: any) => {
           toast.update(updateToastId, {
-            render: `Failed to update :(`,
+            render: `Failed to update :(. ${error}`,
             type: "error",
             isLoading: false,
             autoClose: 5000,
@@ -119,19 +132,11 @@ export default function UpdateForm({
         })
         .finally(() => {
           setIsUploading(false);
-        });
-
-      /*
-      setIsLoading(true);
-      //fetch the data
-      return fetch("https://reqres.in/api/users/1")
-        .then((response) => response.json())
-        .then((data) => console.log(data))
-        .then(() => new Promise((resolve) => setTimeout(resolve, 3000)))
-        .catch((err) => {
-
         })
-        .finally(() => setIsLoading(false));*/
+
+        
+
+  
     },
   });
 
@@ -144,17 +149,7 @@ export default function UpdateForm({
   return (
     <>
       <form id="update-form" className="row g-3" onSubmit={handleSubmit}>
-        <div className={"row g-1"}>
-          <MDBFile
-            id="form-file-update"
-            name="appFile"
-            value={formik.values.appFile}
-            onChange={formik.handleChange}
-          />
-          {formik.errors.name ? (
-            <p className={"invalid-field-text"}>{formik.errors.appFile}</p>
-          ) : null}
-        </div>
+
         <div className={"row g-2"}>
           <div className="row g-2">
             <div className="col-md-4">

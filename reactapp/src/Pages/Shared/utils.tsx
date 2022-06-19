@@ -30,7 +30,7 @@ export async function startDownload(appToDownload: AppData, downloadPath: string
         const { ipcRenderer } = window.require("electron");
         console.log("Before ipcRenderer")
   
-        const res = await ipcRenderer.invoke(ElectronMessages.ElectronMessages.DOWNLOAD_TORRENT, JSON.stringify({ magnet: appToDownload.magnetLink, path: downloadPath, sha: appToDownload.SHA.slice(-1)[0]  }));
+        const res = await ipcRenderer.invoke(ElectronMessages.ElectronMessages.DOWNLOAD_TORRENT, JSON.stringify({ magnet: appToDownload.magnetLink, path: downloadPath, sha: appToDownload.SHA, id: appToDownload.id  }));
         if(!res.success){
           toast.update(toastId, {
             render: `Error downloading ${appToDownload.name}!  ${res.errorMsg}`,
@@ -46,7 +46,7 @@ export async function startDownload(appToDownload: AppData, downloadPath: string
 }
 
 
-export async function createMagnetLink(path: string){
+export async function createMagnetLink(path?: string){
   
   if (IS_ON_ELECTRON) {
     console.log("Creating magnet link")
@@ -71,6 +71,7 @@ export async function createMagnetLink(path: string){
   }
   else{
     console.log("Returning empty magnet")
+    throw new Error("Error generating magnet link")
     return ["", "EMPTY SHA"]
   }
 }
@@ -101,7 +102,7 @@ export async function requestSeed(app: AppData){
       console.log("Before ipcRenderer")
 
       let electronRes = await ipcRenderer
-        .invoke(ElectronMessages.ElectronMessages.SEED_TORRENT , JSON.stringify({ magnet: app.magnetLink, name: app.name, sha: app.SHA.slice(-1)[0]  }))
+        .invoke(ElectronMessages.ElectronMessages.SEED_TORRENT , JSON.stringify({ magnet: app.magnetLink, name: app.name, sha: app.SHA, id: app.id }))
         .then((result: any) => {
           console.log("requestSeed reply:", result);
           if (!result.success) {
@@ -141,6 +142,7 @@ export async function getActiveTorrentData() :Promise<TorrentData[]>{
               magnet: rawTorrentData.magnet,
               peersNum: rawTorrentData.peersNum,
               path: rawTorrentData.path,
+              appId: rawTorrentData.id,
             }
 
        
@@ -174,3 +176,33 @@ export interface TorrentData {
 }
 
 // export type AppDataWithTorrent = AppData & TorrentData;
+
+export async function checkImage(url: string|undefined){
+  if(url===undefined){
+    console.log("No image found")
+   return false
+ }
+  const res = await  new Promise((resolve) => {
+      const img = new Image();
+
+      img.src = url;
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+    });
+  return res
+
+//   console.log("Checking image: ", url)
+//   try{
+//   const res = await fetch(url);
+//   console.log("fetchedRes: ", res)
+//   const buff = await res.blob();
+//   console.log("BUFF: ", buff)
+//   return buff.type.startsWith('image/')
+//  }
+//   catch(e: any){
+//     console.log("Error checking image: ", e.message)
+    
+//     return false
+//   }
+
+} 

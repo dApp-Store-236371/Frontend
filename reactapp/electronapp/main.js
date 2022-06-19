@@ -92,6 +92,9 @@ ipcMain.handle(ElectronMessages.CREATE_MAGNET, async(event, ...args) => {
         const res = { success: false, magnet: undefined, sha: undefined, errorMsg: "" }
         const path = await getFilePath()
         res.sha = await getSHA256(path)
+        if (res.sha === undefined) {
+            console.log("UNDEFFFFINED SHAAAA")
+        }
 
         if (!path || path === "") {
             console.log("No file selected")
@@ -119,7 +122,7 @@ ipcMain.handle(ElectronMessages.CREATE_MAGNET, async(event, ...args) => {
             path: path,
             sha: res.sha
         })
-
+        console.log("Returning successful torrent creating res: ", res)
         return res;
     } catch (err) {
         console.log("Electron CREATE_MAGNET Exception: ", err)
@@ -362,16 +365,13 @@ async function getSHA256(filePath) {
         hashSum.update(fileBuffer);
         const sha256 = hashSum.digest('hex');
         console.log("sha256: ", sha256)
+        return sha256
     } catch (err) {
         console.log("Error getting sha256: ", err)
         return undefined
     }
 }
 
-// const createHashFromFile = filePath => new Promise(resolve => {
-//     const hash = crypto.createHash('sha1');
-//     fs.createReadStream(filePath).on('data', data => hash.update(data)).on('end', () => resolve(hash.digest('hex')));
-//   });
 
 
 
