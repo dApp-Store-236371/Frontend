@@ -13,6 +13,7 @@ import { Dispatch, SetStateAction } from "react";
 import {AppCategories, AppRatings} from "../ReactConstants";
 import { ratingEnumToNumber } from "../Pages/Shared/utils";
 import { toast } from "react-toastify";
+import isElectron from "is-electron";
 
 export async function getPublishedApps() {
   if (IS_DEBUG) {
@@ -532,14 +533,20 @@ async function getFilteredAppsFromDB(offset: number, length: number, textFilter:
       break;
   }
 
-  if (selectedCategory === AppCategories.All || selectedCategory === undefined) {
+  if (selectedCategory === AppCategories.All || selectedCategory === undefined || selectedCategory === "") {
     selectedCategory = "ALL";
   }
   // await fetch(`${API_URL}/hello`, {method: "POST"})
   try{
     const url = `${API_URL}/apps/filtered/${offset}/${length}/${seletedRatingStr}/${selectedCategory}/${textFilter}`
     console.log("db request url: ", url)
-    const res = await fetch(url)
+    let fetchOptions  = {}
+    if(!isElectron()){
+      fetchOptions = {
+        mode: "cors",
+      }
+    }
+    const res = await fetch(url, fetchOptions)
  
     .then(res => {
       console.log("getFilteredAppsFromDB: GOT RES, res: ", res);
