@@ -93,11 +93,11 @@ ipcMain.handle(ElectronMessages.CREATE_MAGNET, async(event, ...args) => {
         const path = await getFilePath()
         res.sha = await getSHA256(path)
         if (res.sha === undefined) {
-            console.log("UNDEFFFFINED SHAAAA")
+            console.error("UNDEFFFFINED SHA")
         }
 
         if (!path || path === "") {
-            console.log("No file selected")
+            console.warn("No file selected")
             res.success = false
             res.errorMsg = "No file selected"
             return res
@@ -125,7 +125,7 @@ ipcMain.handle(ElectronMessages.CREATE_MAGNET, async(event, ...args) => {
         console.log("Returning successful torrent creating res: ", res)
         return res;
     } catch (err) {
-        console.log("Electron CREATE_MAGNET Exception: ", err)
+        console.error("Electron CREATE_MAGNET Exception: ", err)
         return { success: false, magnet: undefined, sha: undefined, errorMsg: err.message }
     }
 });
@@ -312,8 +312,6 @@ ipcMain.handle(ElectronMessages.SEED_TORRENT, async(event, ...args) => {
             return res
         }
 
-
-
         const path = await getFilePath()
 
         if (!path || path === "") {
@@ -330,12 +328,15 @@ ipcMain.handle(ElectronMessages.SEED_TORRENT, async(event, ...args) => {
             return res
         }
 
-        await seedTorrent(path, name)
-        console.log("magnetLink: " + magnetLink)
-
+        const seed_magnet = await seedTorrent(path)
+        console.log("orig magnetLink: " + magnetLink)
+        console.log("seed_magnet: " + seed_magnet)
+        console.log("seed_magnet === origMagnet: ", seed_magnet === magnetLink)
 
         res.success = true
         console.log("Finished succesffuly seeding provided magnet link")
+        console.log("Pushing with expectedSHA: ", expectedSha)
+
         torrentRecoveryData.push({
             magnetLink: magnetLink,
             path: path,

@@ -86,6 +86,7 @@ async function getActiveTorrents(torrentRecoveryData) {
     //     uploadSpeed?: number,
     //     totalSize?: number,
     //     path?: string,
+    //     sha? :string
     //   }
     const activeTorrents = []
     torrentClient.torrents.forEach(torrent => {
@@ -94,6 +95,7 @@ async function getActiveTorrents(torrentRecoveryData) {
         for (let i = 0; i < torrentRecoveryData.length; i++) {
             const torrentRecoveryDataItem = torrentRecoveryData[i]
             if (torrentRecoveryDataItem.magnet === torrent.magnetURI) {
+                console.log("AAA sha: ", torrentRecoveryDataItem.sha)
                 sha = torrentRecoveryDataItem.sha
                 break
             }

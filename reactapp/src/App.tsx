@@ -130,7 +130,7 @@ function App() {
               torrentData.appId = appData.id;
             }
             else{
-              torrentData.appName = "";
+              torrentData.appName = undefined;
               torrentData.appId = undefined;
             }
             return torrentData;
