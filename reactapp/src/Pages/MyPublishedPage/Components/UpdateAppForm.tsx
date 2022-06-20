@@ -227,7 +227,7 @@ export default function UpdateForm({
         <div className="row g-1">
           <div id={"submit-btn-div"} className="col-md-100">
             <MDBBtn id={"submit-btn"} disabled={isLoading} type="submit">
-              Upload New Version
+              Choose File & Upload New Version
             </MDBBtn>
           </div>
         </div>

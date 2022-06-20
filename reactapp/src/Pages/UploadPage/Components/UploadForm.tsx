@@ -300,7 +300,7 @@ export default function UploadForm({
         <div className="row g-1">
           <div className="col-md-2">
             <MDBBtn id="submit-btn" type="submit">
-              Upload
+              Choose File & Upload
             </MDBBtn>
           </div>
         </div>
