@@ -24,6 +24,8 @@ import "../../../CSS/appImage.css";
 import { toast } from "react-toastify";
 import { purchase, rateApp } from "../../../Web3Communication/Web3ReactApi";
 import { checkImage, startDownload, TorrentData } from "../../Shared/utils";
+import { useNavigate } from "react-router-dom";
+import { PagePaths } from "../../../ReactConstants";
 
 interface AppDetailsModalProps {
   app: AppData;
@@ -34,6 +36,8 @@ interface AppDetailsModalProps {
   setIsLoading: Dispatch<SetStateAction<boolean>>;
   activeTorrents: TorrentData[];
   downloadPath: string;
+  setSelectedAppData: Dispatch<SetStateAction<AppData>>;
+
 }
 
 export default function AppDetailsModal({
@@ -44,10 +48,12 @@ export default function AppDetailsModal({
   isLoading,
   setIsLoading,
   activeTorrents,
-  downloadPath
+  downloadPath,
+  setSelectedAppData
 }: AppDetailsModalProps) {
   const [rating, setRating] = useState<number>(0); // initial rating value
   const [ownedState, setOwnedStateState] = useState<boolean>(false);
+  let navigate = useNavigate();
 
   const setAppOwned = (new_owned: boolean) => {
     setOwnedStateState(new_owned);
@@ -104,6 +110,8 @@ export default function AppDetailsModal({
             isLoading: false,
             autoClose: 5000,
           });
+          setShowModal(false);
+          navigate(PagePaths.PurchasesPagePath);
           //TODO: refetch app data.
           // const new_app_data = await fetchAppById(app.id);
         })

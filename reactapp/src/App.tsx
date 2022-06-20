@@ -69,7 +69,7 @@ function App() {
   const [activeTorrents, setActiveTorrents] = useState<TorrentData[]>([]);
 
   const [featuredApp, setFeaturedApp] = useState<AppData | undefined >(undefined);
-  const [useServer, setUseServer] = useState<boolean>(true);
+  const [useServer, setUseServer] = useState<boolean>(false);
 
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>(AppCategories.All)

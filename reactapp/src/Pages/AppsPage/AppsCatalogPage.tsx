@@ -39,7 +39,7 @@ function AppsCatalogPage(props: AppsCatalogPageProps) {
   const [selectedAppData, setSelectedAppData] =
     useState<AppData>(DEFAULT_EMPTY_APP);
   const toggleShowModal = () => setShowModal(!showModal);
-
+  
   //Display Dummy apps
   useEffect(() => {
     getDisplayedApps(0, APPS_PER_PAGE, setDisplayedApps, setNumberOfPages, props.useServer );
@@ -70,6 +70,7 @@ function AppsCatalogPage(props: AppsCatalogPageProps) {
         setIsLoading={props.setIsLoading}
         activeTorrents={props.activeTorrents}
         downloadPath={props.downloadPath}
+        setSelectedAppData={setSelectedAppData}
       />
       <div id="apps-catalog">
         <AppsCatalog
