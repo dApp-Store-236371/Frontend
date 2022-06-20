@@ -110,22 +110,27 @@ function App() {
     try{
         if(isElectron()) {
           let activeTorrentsData: TorrentData[] = await getActiveTorrentData();
-          console.warn("Active torrents data: " + JSON.stringify(activeTorrentsData));
+          console.debug("Active torrents data: " + JSON.stringify(activeTorrentsData));
          // setOwnedApps(await getOwnedApps());
          const myApps: AppData[] = await getOwnedApps()
           activeTorrentsData = activeTorrentsData.map(torrentData => {
-             console.log("refreshActiveTorrentData my apps: " + JSON.stringify(myApps)+" aaa", myApps);
+             console.debug("refreshActiveTorrentData my apps: " + JSON.stringify(myApps)+" aaa", myApps);
 
             // console.log("\n refreshActiveTorrentData torrentData: " + JSON.stringify(torrentData)+"\n");
-            let appData: AppData|undefined = myApps.find(app => app.magnetLink === torrentData.magnet);
-            console.warn("BEFORE: ", appData);
+            //let appData: AppData|undefined = myApps.find(app => app.magnetLink === torrentData.magnet);
+            let appData = myApps.find(app => app.magnetLink === torrentData.magnet);
+            if(torrentData.appId !== undefined){
+              console.log("refreshActiveTorrentData appId is not undefined")
+              appData = myApps.find(app => app.id === torrentData.appId);
+            }
+
             if (appData === undefined &&  torrentData.sha !== undefined) {
-              console.log("refreshActiveTorrentData is using SHA ", torrentData.sha)
+              console.debug("refreshActiveTorrentData is using SHA ", torrentData.sha)
               appData = myApps.find(app => app.SHA[-1] === torrentData.sha);
             }
 
             if(appData !== undefined){
-              console.log("refreshActiveTorrentDataFound app data for torrent: " + appData.name + torrentData.magnet, "id is " + appData.id)
+              console.debug("refreshActiveTorrentDataFound app data for torrent: " + appData.name + torrentData.magnet, "id is " + appData.id)
               torrentData.appName = appData.name;
               torrentData.appId = appData.id;
             }

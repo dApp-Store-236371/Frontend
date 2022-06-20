@@ -9,10 +9,11 @@ import {AppCategories, APPS_PER_PAGE, MAX_DESCRIPTION_LENGTH} from "../../../Rea
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import "../../../CSS/appImage.css";
-import { uploadApp} from "../../../Web3Communication/Web3ReactApi";
+import { fetchAppById, getTotalNumOfApps, uploadApp} from "../../../Web3Communication/Web3ReactApi";
 import { toast } from "react-toastify";
 //import { createMagnetLink } from "../../../../electronapp/main";
-import { createMagnetLink } from "../../Shared/utils";
+import { createMagnetLink, updateElectronAppId } from "../../Shared/utils";
+import AppData from "../../AppsPage/AppData";
 //import { createMagnetLink } from "../../../electronCommunication";
 
 interface UploadFormProps {
@@ -123,13 +124,35 @@ export default function UploadForm({
         sha,
           values.category,
       )
-        .then(() => {
+        .then(async () => {
           toast.update(publishingToastId, {
             render: `Published ${values.name} 🎉🎉🎉`,
             type: "success",
             isLoading: false,
             autoClose: 5000,
           });
+          try{
+            const appsNum = await getTotalNumOfApps()
+            let currId = appsNum -1;
+            while(currId >= 0){
+
+              const appData: AppData = await fetchAppById(currId);
+              console.log("Looping after upload to update id: currId = ", currId, "magnet_link = ", magnet_link, "app.magnet = ", appData.magnetLink)
+
+              if(appData.magnetLink!== undefined && magnet_link !== undefined && appData.magnetLink === magnet_link){
+                updateElectronAppId(currId, appData.magnetLink);
+                console.warn("Updated electron app id (Upload Form)")
+                break;
+              }
+              currId--;
+              await new Promise(r => setTimeout(r, 0));
+
+            }
+          }
+          catch(err){
+            console.error("(upload) error updating electron app id: ", err)
+          }
+
         })
         .catch((error: any) => {
           toast.update(publishingToastId, {

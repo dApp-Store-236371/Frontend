@@ -83,10 +83,37 @@ ipcMain.handle(ElectronMessages.ECHO_MSG, async(event, ...args) => {
     return args;
 });
 
+ipcMain.handle(ElectronMessages.UPDATE_APP_ID, async(event, ...args) => {
+    console.log("UPDATE_APP_ID Updating app id: ", args)
+    const argsObject = JSON.parse(args[0])
+    const appId = argsObject["appId"]
+    const magnet = argsObject["magnet"]
+    console.log("UPDATE_APP_ID appId: ", appId)
+    console.log("UPDATE_APP_ID magnet: ", magnet)
+    if (appId === undefined || magnet === undefined) {
+        console.log("UPDATE_APP_ID Invalid app id or magnet")
+        return
+    }
+
+    //iterate on torrent recovery data in reverse
+    for (let i = torrentRecoveryData.length - 1; i >= 0; i--) {
+        console.log("UPDATE_APP_ID torrentRecoveryData magnet: ", torrentRecoveryData[i]["magnetLink"])
+
+        if (torrentRecoveryData[i]["magnetLink"] === magnet) {
+            torrentRecoveryData[i]["id"] = appId
+        }
+        break;
+    }
+
+
+
+
+});
+
 ipcMain.handle(ElectronMessages.CREATE_MAGNET, async(event, ...args) => {
+
     console.log("Electron CREATE MAGNET")
     console.log(args);
-
     try {
 
         const res = { success: false, magnet: undefined, sha: undefined, errorMsg: "" }
@@ -120,7 +147,7 @@ ipcMain.handle(ElectronMessages.CREATE_MAGNET, async(event, ...args) => {
         torrentRecoveryData.push({
             magnetLink: magnetLink,
             path: path,
-            sha: res.sha
+            sha: res.sha,
         })
         console.log("Returning successful torrent creating res: ", res)
         return res;
@@ -133,9 +160,12 @@ ipcMain.handle(ElectronMessages.CREATE_MAGNET, async(event, ...args) => {
 ipcMain.handle(ElectronMessages.DOWNLOAD_TORRENT, async(event, ...args) => {
     console.log("Electron DOWNLOAD TORRENT. args: ", args)
     const argsObject = JSON.parse(args[0])
-    console.log("download magnet: ", argsObject['magnet']);
-    console.log("expectedSha: ", argsObject['sha']);
+    console.log("DOWNLOADTORRENT download magnet: ", argsObject['magnet']);
+    console.log("DOWNLOADTORRENT expectedSha: ", argsObject['sha']);
+
     const expectedSha = argsObject['sha']
+    const appId = argsObject['appId']
+    console.log("DOWNLOADTORRENT appId: ", appId)
     const res = { success: false, errorMsg: "" }
 
     const magnet = argsObject.magnet;
@@ -149,11 +179,11 @@ ipcMain.handle(ElectronMessages.DOWNLOAD_TORRENT, async(event, ...args) => {
             // }
     }
 
-    console.log("Args object path: ", path)
+    console.log("DOWNLOADTORRENT Args object path: ", path)
     try {
 
         if (!magnet) {
-            console.log("No magnet link")
+            console.log("DOWNLOADTORRENT No magnet link")
             res.success = false
             res.errorMsg = "No magnet link"
             return res
@@ -161,17 +191,17 @@ ipcMain.handle(ElectronMessages.DOWNLOAD_TORRENT, async(event, ...args) => {
         downloadMagnetLink(magnet, path)
 
         res.success = true
-
         torrentRecoveryData.push({
             magnetLink: magnet,
             path: path,
-            sha: expectedSha
+            sha: expectedSha,
+            id: appId
         })
 
 
         return res;
     } catch (err) {
-        console.log("DEBUG: ", err)
+        console.log("DOWNLOADTORRENT ERROR: ", err)
         res.success = false
         res.errorMsg = err
         return res
@@ -296,7 +326,7 @@ ipcMain.handle(ElectronMessages.SEED_TORRENT, async(event, ...args) => {
         const magnetLink = argsObject.magnet;
         const name = argsObject.name;
         const expectedSha = argsObject.sha;
-
+        const appId = argsObject['appId']
         if (!magnetLink || magnetLink === "") {
             console.log("Empty Magnet Link")
             res.success = false
@@ -340,7 +370,8 @@ ipcMain.handle(ElectronMessages.SEED_TORRENT, async(event, ...args) => {
         torrentRecoveryData.push({
             magnetLink: magnetLink,
             path: path,
-            sha: expectedSha
+            sha: expectedSha,
+            id: appId
         })
 
         return res;

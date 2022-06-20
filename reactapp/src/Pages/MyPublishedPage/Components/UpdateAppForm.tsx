@@ -16,8 +16,8 @@ import SpinnerButton from "@vlsergey/react-bootstrap-button-with-spinner";
 import "../../../CSS/UpdateAppForm.css";
 import FallbackImg from "../../../Misc/fix-invalid-image-error.png";
 import { toast } from "react-toastify";
-import { updateApp } from "../../../Web3Communication/Web3ReactApi";
-import { createMagnetLink } from "../../Shared/utils";
+import { fetchAppById, getTotalNumOfApps, updateApp } from "../../../Web3Communication/Web3ReactApi";
+import { createMagnetLink, updateElectronAppId } from "../../Shared/utils";
 
 interface UpdateFormProps {
   currAppData: AppData;
@@ -100,13 +100,29 @@ export default function UpdateForm({
           values.price,
           sha
         )
-          .then(() => {
+          .then(async () => {
             toast.update(updateToastId, {
               render: `Updated ${values.name}!`,
               type: "success",
               isLoading: false,
               autoClose: 5000,
             });
+
+            try{
+
+              const appId = values.id
+              const appData: AppData = await fetchAppById(values.id);
+                // console.log("Looping after upload to update id: currId = " magnet, "app.magnet = ", appData.magnetLink)
+                if(appData.magnetLink!== undefined && magnet !== undefined && appData.magnetLink === magnet){
+                  updateElectronAppId(appId, appData.magnetLink);
+                  console.log("Updated electron app id (Upload Form)", appId)
+                }
+              
+            }
+            catch(err){
+              console.error("(update) error updating electron app id: ", err)
+            }
+
           })
           .catch((error: any) => {
             toast.update(updateToastId, {

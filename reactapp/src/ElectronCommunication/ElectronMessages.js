@@ -7,5 +7,6 @@ module.exports = {
         GET_ACTIVE_TORRENT_DATA: "getActiveTorrentData",
         ACCOUNT_ID_UPDATE: "updateAccountID",
         REMOVE_TORRENT: "removeTorrent",
+        UPDATE_APP_ID: "updateAppID",
     }
 }

@@ -328,7 +328,7 @@ export const updateApp = async (
 };
 
 
-async function fetchAppById(id: number) {
+export async function fetchAppById(id: number) {
   const app_arr = await (await fetchDisplayedApps(1, id)).displayedApps;
   if(app_arr.length === 0){
     return null;

@@ -92,14 +92,18 @@ async function getActiveTorrents(torrentRecoveryData) {
     torrentClient.torrents.forEach(torrent => {
 
         let sha = undefined
+        let appId = undefined
+        console.log("torrentRecoveryData len: ", torrentRecoveryData.length)
         for (let i = 0; i < torrentRecoveryData.length; i++) {
             const torrentRecoveryDataItem = torrentRecoveryData[i]
-            if (torrentRecoveryDataItem.magnet === torrent.magnetURI) {
-                console.log("AAA sha: ", torrentRecoveryDataItem.sha)
+            if (torrentRecoveryDataItem.magnetLink === torrent.magnetURI) {
+                console.log("torrentRecoveryDataItem: ", torrentRecoveryDataItem)
                 sha = torrentRecoveryDataItem.sha
+                appId = torrentRecoveryDataItem["id"]
                 break
             }
         }
+        console.log("activeTorrents appId: ", appId)
         const torrentData = {
             magnet: torrent.magnetURI,
             name: torrent.name,
@@ -109,6 +113,7 @@ async function getActiveTorrents(torrentRecoveryData) {
             path: torrent.path,
             peersNum: torrent.numPeers,
             sha: sha,
+            appId: appId
         }
 
 

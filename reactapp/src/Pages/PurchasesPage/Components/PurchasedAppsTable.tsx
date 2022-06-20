@@ -33,13 +33,17 @@ export function PurchasedAppsTable({
   downloadPath,
 }: purchasedAppsTableProps) {
 
-  const getDownloadBtnTxt = (origApp: any) => {
+  const getDownloadBtnTxt = (origApp: AppData) => {
+    
     console.log("getDownloadBtnTxt, origApp: ", origApp);
+    console.log("getDownloadBtnTxt, activeTorrents: ", activeTorrents);
+    console.log("getDownloadBtnTxt, origApp.magnetLink: ", origApp.magnetLink);
+
     if (!isElectron()){
       return (["Get Desktop Client",])
     }
-    else if (activeTorrents.filter(t => ((t.appName === origApp.name) && (t.magnet !== origApp.magnetLink))).length > 0){
-      return ["Update"];
+    else if (activeTorrents.filter(t => ((t.appId === origApp.id) && (t.magnet !== origApp.magnetLink))).length > 0){
+      return ["New Version Available"];
     }
     else{
       return ["Download"];
@@ -109,7 +113,9 @@ export function PurchasedAppsTable({
             
             <MDBBtn
               size={"sm"}
-              disabled={activeTorrents.filter(torrent => torrent.magnet === value.cell.row.original.magnetLink).length > 0}
+              disabled={
+                activeTorrents.filter(t => ((t.appId === value.cell.row.original.id) && (t.magnet === value.cell.row.original.magnetLink))).length > 0
+              }
               onClick={() => downloadBtnHandler(value.cell.row.original)}
             >
               {getDownloadBtnTxt(value.cell.row.original)}

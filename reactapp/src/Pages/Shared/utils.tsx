@@ -30,7 +30,7 @@ export async function startDownload(appToDownload: AppData, downloadPath: string
         const { ipcRenderer } = window.require("electron");
         console.log("Before ipcRenderer")
   
-        const res = await ipcRenderer.invoke(ElectronMessages.ElectronMessages.DOWNLOAD_TORRENT, JSON.stringify({ magnet: appToDownload.magnetLink, path: downloadPath, sha: appToDownload.SHA, id: appToDownload.id  }));
+        const res = await ipcRenderer.invoke(ElectronMessages.ElectronMessages.DOWNLOAD_TORRENT, JSON.stringify({ magnet: appToDownload.magnetLink, path: downloadPath, sha: appToDownload.SHA, appId: appToDownload.id  }));
         if(!res.success){
           toast.update(toastId, {
             render: `Error downloading ${appToDownload.name}!  ${res.errorMsg}`,
@@ -94,6 +94,25 @@ export function ratingEnumToNumber(rating: AppRatings){
   }
 }
 
+export async function updateElectronAppId(id: number, magnet: string){
+  if (IS_ON_ELECTRON) {
+    console.log("Updating electron app id")
+try{
+    const { ipcRenderer } = window.require("electron");
+    console.log("updateElectronAppId Before ipcRenderer")
+    
+    await ipcRenderer.invoke(ElectronMessages.ElectronMessages.UPDATE_APP_ID , JSON.stringify({  appId: id, magnet: magnet }));
+
+    
+  }
+  catch(err){
+    console.error("Error updating electron app id: ", id, magnet, err)
+  }
+}
+
+}
+
+
 export async function requestSeed(app: AppData){
   if (IS_ON_ELECTRON) {
     console.log("Requesting seed, ", app, app.SHA)
@@ -102,7 +121,7 @@ export async function requestSeed(app: AppData){
       console.log("Before ipcRenderer")
 
       let electronRes = await ipcRenderer
-        .invoke(ElectronMessages.ElectronMessages.SEED_TORRENT , JSON.stringify({ magnet: app.magnetLink, name: app.name, sha: app.SHA, id: app.id }))
+        .invoke(ElectronMessages.ElectronMessages.SEED_TORRENT , JSON.stringify({ magnet: app.magnetLink, name: app.name, sha: app.SHA, appId: app.id }))
         .then((result: any) => {
           console.log("requestSeed reply:", result);
           if (!result.success) {
@@ -142,7 +161,7 @@ export async function getActiveTorrentData() :Promise<TorrentData[]>{
               magnet: rawTorrentData.magnet,
               peersNum: rawTorrentData.peersNum,
               path: rawTorrentData.path,
-              appId: rawTorrentData.id,
+              appId: rawTorrentData.appId,
             }
 
        
