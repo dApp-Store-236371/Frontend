@@ -173,6 +173,7 @@ export interface TorrentData {
   peersNum?: number,
   appName?: string,
   appId?: number,
+  sha?: string
 }
 
 // export type AppDataWithTorrent = AppData & TorrentData;

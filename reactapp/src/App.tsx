@@ -11,7 +11,7 @@ import Footer from "./Pages/Shared/Footer";
 import SideNav from "./Pages/Shared/SideNav";
 import { IS_ON_ELECTRON } from "./ElectronCommunication/SharedElectronConstants";
 import UploadPage from "./Pages/UploadPage/UploadPage";
-import {AppCategories, AppRatings, PagePaths} from "./ReactConstants";
+import {AppCategories, AppRatings, DEFAULT_DOWNLOAD_PATH, PagePaths} from "./ReactConstants";
 import AppData from "./Pages/AppsPage/AppData";
 import PublishedPage from "./Pages/MyPublishedPage/PublishedPage";
 import { toast } from "react-toastify";
@@ -64,7 +64,7 @@ function App() {
   const [currAccount, setCurrAccount] = useState<string>("");
   const [provider, setProvider] = useState<any>(undefined);
   const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
-  const [defaultPath, setDefaultPath] = useState<string>("C:\\daapstoreDownloads");
+  const [defaultPath, setDefaultPath] = useState<string>(DEFAULT_DOWNLOAD_PATH);
 
   const [activeTorrents, setActiveTorrents] = useState<TorrentData[]>([]);
 
@@ -110,18 +110,28 @@ function App() {
     try{
         if(isElectron()) {
           let activeTorrentsData: TorrentData[] = await getActiveTorrentData();
-          console.log("Active torrents data: " + JSON.stringify(activeTorrentsData));
+          console.warn("Active torrents data: " + JSON.stringify(activeTorrentsData));
          // setOwnedApps(await getOwnedApps());
          const myApps: AppData[] = await getOwnedApps()
           activeTorrentsData = activeTorrentsData.map(torrentData => {
              console.log("refreshActiveTorrentData my apps: " + JSON.stringify(myApps)+" aaa", myApps);
 
             // console.log("\n refreshActiveTorrentData torrentData: " + JSON.stringify(torrentData)+"\n");
-            const appData: AppData|undefined = myApps.find(app => app.magnetLink === torrentData.magnet);
+            let appData: AppData|undefined = myApps.find(app => app.magnetLink === torrentData.magnet);
+            console.warn("BEFORE: ", appData);
+            if (appData === undefined &&  torrentData.sha !== undefined) {
+              console.log("refreshActiveTorrentData is using SHA ", torrentData.sha)
+              appData = myApps.find(app => app.SHA[-1] === torrentData.sha);
+            }
+
             if(appData !== undefined){
-              console.log("refreshActiveTorrentDataFound app data for torrent: " + torrentData.magnet, "id is " + appData.id)
+              console.log("refreshActiveTorrentDataFound app data for torrent: " + appData.name + torrentData.magnet, "id is " + appData.id)
               torrentData.appName = appData.name;
               torrentData.appId = appData.id;
+            }
+            else{
+              torrentData.appName = "";
+              torrentData.appId = undefined;
             }
             return torrentData;
           })

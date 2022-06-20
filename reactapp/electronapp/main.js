@@ -184,7 +184,7 @@ ipcMain.handle(ElectronMessages.GET_ACTIVE_TORRENT_DATA, async(event, ...args) =
     // console.log("GETTING ACTIVE DATA")
 
     try {
-        const torrents = await getActiveTorrents()
+        const torrents = await getActiveTorrents(torrentRecoveryData)
             // console.log("torrents: ", torrents)
         return torrents
     } catch (err) {
@@ -339,6 +339,7 @@ ipcMain.handle(ElectronMessages.SEED_TORRENT, async(event, ...args) => {
         torrentRecoveryData.push({
             magnetLink: magnetLink,
             path: path,
+            sha: expectedSha
         })
 
         return res;

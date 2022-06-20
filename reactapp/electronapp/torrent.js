@@ -77,7 +77,7 @@ function isSeedingOrDownloadingMagnetLink(magnetLink) {
     return torrentsWithSameMagnet.length > 0
 }
 
-async function getActiveTorrents() {
+async function getActiveTorrents(torrentRecoveryData) {
     // export interface TorrentData {
     //     magnet?: string,
     //     name?: string,
@@ -90,6 +90,14 @@ async function getActiveTorrents() {
     const activeTorrents = []
     torrentClient.torrents.forEach(torrent => {
 
+        let sha = undefined
+        for (let i = 0; i < torrentRecoveryData.length; i++) {
+            const torrentRecoveryDataItem = torrentRecoveryData[i]
+            if (torrentRecoveryDataItem.magnet === torrent.magnetURI) {
+                sha = torrentRecoveryDataItem.sha
+                break
+            }
+        }
         const torrentData = {
             magnet: torrent.magnetURI,
             name: torrent.name,
@@ -98,7 +106,10 @@ async function getActiveTorrents() {
             uploadSpeed: torrent.uploadSpeed,
             path: torrent.path,
             peersNum: torrent.numPeers,
+            sha: sha,
         }
+
+
         activeTorrents.push(torrentData)
     })
     return activeTorrents
