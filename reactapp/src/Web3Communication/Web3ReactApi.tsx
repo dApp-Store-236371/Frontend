@@ -105,11 +105,10 @@ export async function getOwnedApps() {
           };
           ownedApps.push(app);
         });
-
         return ownedApps;
       })
       .catch((error: any) => {
-        console.log("ERROR in getContractValue", error);
+        console.error("ERROR in getOwnedApps", error);
         return [];
       });
     console.log("ownedApps= ", ownedApps);

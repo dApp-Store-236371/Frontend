@@ -238,12 +238,17 @@ async function reloadBackupTorrents() {
 
     stopAllTorrents()
     for (let i = 0; i < currAccountData.length; i++) {
-        const torrent = currAccountData[i]
-        if ((await getSHA256(torrent.path)) === torrent.sha) {
-            seedTorrent(torrent.path, path.basename(torrent.path))
-        } else {
-            downloadMagnetLink(torrent.magnetLink, torrent.path)
+        try {
+            const torrent = currAccountData[i]
+            if ((await getSHA256(torrent.path)) === torrent.sha) {
+                seedTorrent(torrent.path, path.basename(torrent.path))
+            } else {
+                downloadMagnetLink(torrent.magnetLink, torrent.path)
+            }
+        } catch (err) {
+            console.log("Error reloading backup torrent: ", err)
         }
+
     }
 
 

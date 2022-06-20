@@ -21,7 +21,7 @@ import { LoginModal } from "./Pages/LoginPage/LoginModal";
 
 import Web3 from "web3";
 import { Web3TestPage } from "./Web3Communication/Web3TestPage";
-import { getFeaturedApp, uploadDummyApps } from "./Web3Communication/Web3ReactApi";
+import { getFeaturedApp, getOwnedApps, uploadDummyApps } from "./Web3Communication/Web3ReactApi";
 import { web3 } from "./Web3Communication/Web3Init";
 import { SettingsModal } from "./Pages/Shared/SettingsModal";
 import { StatusPage } from "./Pages/StatusPage/StatusPage";
@@ -84,7 +84,16 @@ function App() {
       }
 
       updateFeaturedApp();
+
+
   }, [provider])
+
+  // useEffect(() => {
+  //   let foo = async () => {
+  //     setOwnedApps(await getOwnedApps());
+  //   };
+  //   foo();
+  // }, [currAccount]);
 
   //update electron about account change
   useEffect(() => {
@@ -98,19 +107,31 @@ function App() {
 
   //refresh torrent data
   async function refreshActiveTorrentData(){
-    if(isElectron()) {
-      let activeTorrentsData: TorrentData[] = await getActiveTorrentData();
-      activeTorrentsData = activeTorrentsData.map(torrentData => {
-        const appData: AppData|undefined = ownedApps.find(app => app.magnetLink === torrentData.magnet);
-        if(appData !== undefined){
-          console.log("Found app data for torrent: " + torrentData.magnet, "id is " + appData.id)
-          torrentData.appName = appData.name;
-          torrentData.appId = appData.id;
+    try{
+        if(isElectron()) {
+          let activeTorrentsData: TorrentData[] = await getActiveTorrentData();
+          console.log("Active torrents data: " + JSON.stringify(activeTorrentsData));
+         // setOwnedApps(await getOwnedApps());
+         const myApps: AppData[] = await getOwnedApps()
+          activeTorrentsData = activeTorrentsData.map(torrentData => {
+             console.log("refreshActiveTorrentData my apps: " + JSON.stringify(myApps)+" aaa", myApps);
+
+            // console.log("\n refreshActiveTorrentData torrentData: " + JSON.stringify(torrentData)+"\n");
+            const appData: AppData|undefined = myApps.find(app => app.magnetLink === torrentData.magnet);
+            if(appData !== undefined){
+              console.log("refreshActiveTorrentDataFound app data for torrent: " + torrentData.magnet, "id is " + appData.id)
+              torrentData.appName = appData.name;
+              torrentData.appId = appData.id;
+            }
+            return torrentData;
+          })
+          setActiveTorrents(activeTorrentsData);
         }
-        return torrentData;
-      })
-      setActiveTorrents(activeTorrentsData);
-    }
+        
+      }
+      catch(e){
+        console.error("ERROR refreshActiveTorrentData: ", e);
+      }
   }
 
   useEffect(() => {
