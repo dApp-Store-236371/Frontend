@@ -55,7 +55,7 @@ function createWindow() {
     // Open the DevTools.
     mainWindow.webContents.openDevTools({ mode: "detach" });
 
-    reloadBackupTorrents()
+    //reloadBackupTorrents()
 }
 
 
@@ -214,6 +214,7 @@ ipcMain.handle(ElectronMessages.GET_ACTIVE_TORRENT_DATA, async(event, ...args) =
     // console.log("GETTING ACTIVE DATA")
 
     try {
+        console.log("CHECK2: ", torrentRecoveryData)
         const torrents = await getActiveTorrents(torrentRecoveryData)
             // console.log("torrents: ", torrents)
         return torrents
@@ -245,7 +246,10 @@ ipcMain.handle(ElectronMessages.ACCOUNT_ID_UPDATE, async(event, ...args) => {
 
         await reloadBackupTorrents()
 
-        torrentRecoveryData = []
+        torrentRecoveryData = electronStore.get(currAccountID)
+
+
+
         return currAccountID
 
     } catch (err) {
@@ -255,6 +259,7 @@ ipcMain.handle(ElectronMessages.ACCOUNT_ID_UPDATE, async(event, ...args) => {
 })
 
 async function reloadBackupTorrents() {
+
     if (currAccountID === undefined) {
         return
     }
@@ -266,17 +271,63 @@ async function reloadBackupTorrents() {
     }
 
 
-    stopAllTorrents()
+    await stopAllTorrents()
     for (let i = 0; i < currAccountData.length; i++) {
         try {
             const torrent = currAccountData[i]
-            if ((await getSHA256(torrent.path)) === torrent.sha) {
-                seedTorrent(torrent.path, path.basename(torrent.path))
+            console.log("Attempting to recover torrent: ", torrent)
+            let isDir = false;
+            try {
+                isDir = fs.lstatSync(torrent.path).isDirectory()
+            } catch (err) {
+                console.log("Error getting file stats: ", err)
+            }
+            if (isSeedingOrDownloadingMagnetLink(torrent.magnetLink)) {
+                return
+            }
+            let done = false
+            if (isDir) {
+                console.log("Torrent path is directory")
+                for (let fileName of fs.readdirSync(torrent.path)) {
+                    const fullPath = path.join(torrent.path, fileName)
+                    console.log("filePath: ", fullPath)
+                    if (await getSHA256(fullPath) === torrent.sha) {
+                        seedTorrent(fullPath)
+                        done = true
+                        break;
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 0));
+
+                }
+
             } else {
+                console.log("Torrent path is file")
+                if ((await getSHA256(torrent.path)) === torrent.sha) {
+                    seedTorrent(torrent.path)
+                    done = true
+                }
+
+            }
+            if (!done) {
+                console.log("Failed to find file for torrent: ", torrent)
                 downloadMagnetLink(torrent.magnetLink, torrent.path)
             }
+
+
+            // if ((await getSHA256(torrent.path)) === torrent.sha) {
+            //     seedTorrent(torrent.path, path.basename(torrent.path))
+            // } else{
+
+
+
+            //     downloadMagnetLink(torrent.magnetLink, torrent.path)
+            // }
+
+
         } catch (err) {
             console.log("Error reloading backup torrent: ", err)
+        } finally {
+            await new Promise(resolve => setTimeout(resolve, 0));
         }
 
     }
@@ -298,13 +349,16 @@ ipcMain.handle(ElectronMessages.REMOVE_TORRENT, async(event, ...args) => {
         for (let torrent of sameMagnetTorrents) {
             torrent.destroy()
             console.log("torrent recovery before destroy: ", torrentRecoveryData)
-            torrentRecoveryData = torrentRecoveryData.filter(item => item.magnetLink !== torrent.magnetURI)
             console.log("torrent recovery after destroy: ", torrentRecoveryData)
+
+            await new Promise(resolve => setTimeout(resolve, 0));
         }
 
 
     } catch (err) {
         console.error("Electron REMOVE TORRENT Exception: ", err)
+    } finally {
+        torrentRecoveryData = torrentRecoveryData.filter(item => item.magnetLink !== magnet)
     }
 })
 

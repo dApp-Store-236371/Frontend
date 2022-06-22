@@ -47,19 +47,27 @@ function downloadMagnetLink(magnetLink, downloadPath = "C:\\daapstoreDownloads")
         console.log("torrentsWithSameMagnet: ", torrentsWithSameMagnet)
         if (torrentsWithSameMagnet.length > 0) {
             console.log("Torrent already exists")
-            if (torrentsWithSameMagnet[0].progress === 1) {
-                console.log("Torrent already downloaded")
-                throw new Error("Torrent already downloaded")
-            } else {
-                console.log("Torrent already downloading")
-                throw new Error("Torrent already downloading")
+
+            for (let i = 0; i < torrentsWithSameMagnet.length; i++) {
+                const torrent = torrentsWithSameMagnet[i]
+                console.log("torrent: ", torrent)
+                torrent.destroy()
             }
+            // if (torrentsWithSameMagnet[0].progress === 1) {
+            //     console.log("Torrent already downloaded")
+            //     throw new Error("Torrent already downloaded")
+            // } else {
+            //     console.log("Torrent already downloading")
+            //     throw new Error("Torrent already downloading")
+            // }
         }
 
 
 
         torrentClient.add(magnetLink, { path: downloadPath }, function(torrent) {
-            console.log('Client is downloading:', torrent.name)
+
+            console.log("CHECK")
+            console.log('Client is downloading:', torrent.name, ". To path: ", torrent.path)
                 // addTorrentEventListeners(torrent)
         })
 
@@ -89,11 +97,13 @@ async function getActiveTorrents(torrentRecoveryData) {
     //     sha? :string
     //   }
     const activeTorrents = []
-    torrentClient.torrents.forEach(torrent => {
+    for (let i = 0; i < torrentClient.torrents.length; i++) {
+        const torrent = torrentClient.torrents[i]
+
 
         let sha = undefined
         let appId = undefined
-        console.log("torrentRecoveryData len: ", torrentRecoveryData.length)
+        console.log("torrentRecoveryData len: ", torrentRecoveryData.length, torrentRecoveryData)
         for (let i = 0; i < torrentRecoveryData.length; i++) {
             const torrentRecoveryDataItem = torrentRecoveryData[i]
             if (torrentRecoveryDataItem.magnetLink === torrent.magnetURI) {
@@ -102,23 +112,26 @@ async function getActiveTorrents(torrentRecoveryData) {
                 appId = torrentRecoveryDataItem["id"]
                 break
             }
+            await new Promise(resolve => setTimeout(resolve, 0));
         }
-        console.log("activeTorrents appId: ", appId)
-        const torrentData = {
-            magnet: torrent.magnetURI,
-            name: torrent.name,
-            progress: torrent.progress,
-            downloadSpeed: torrent.downloadSpeed,
-            uploadSpeed: torrent.uploadSpeed,
-            path: torrent.path,
-            peersNum: torrent.numPeers,
-            sha: sha,
-            appId: appId
+        if (appId !== undefined) {
+            console.log("activeTorrents appId: ", appId)
+            const torrentData = {
+                magnet: torrent.magnetURI,
+                name: torrent.name,
+                progress: torrent.progress,
+                downloadSpeed: torrent.downloadSpeed,
+                uploadSpeed: torrent.uploadSpeed,
+                path: torrent.path,
+                peersNum: torrent.numPeers,
+                sha: sha,
+                appId: appId
+            }
+            activeTorrents.push(torrentData)
         }
+        await new Promise(resolve => setTimeout(resolve, 0));
 
-
-        activeTorrents.push(torrentData)
-    })
+    }
     return activeTorrents
 
 }
@@ -133,7 +146,7 @@ async function seedTorrent(torrentPath, name) {
     try {
         let magnetURI = undefined
 
-        const torrent = torrentClient.seed(torrentPath, { name: name, announceList: announceList }, function(torrent) {
+        const torrent = torrentClient.seed(torrentPath, { announceList: announceList }, function(torrent) {
             console.log('Client is seeding:', torrent.name)
             console.log('Magnet Link: ', torrent.magnetURI)
 
@@ -210,15 +223,17 @@ async function addTorrentEventListeners(torrent) {
 }
 
 
-function stopAllTorrents() {
-    torrentClient.torrents.forEach(torrent => {
+async function stopAllTorrents() {
+    torrentClient.torrents.forEach(async torrent => {
         torrent.destroy()
+        await new Promise(resolve => setTimeout(resolve, 0));
+
     })
 }
 
 module.exports = {
-    downloadMagnetLink,
     seedTorrent,
+    downloadMagnetLink,
     isSeedingOrDownloadingMagnetLink,
     getActiveTorrents,
     stopAllTorrents,
