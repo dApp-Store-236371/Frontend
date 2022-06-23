@@ -1,5 +1,7 @@
 import isElectron from "is-electron";
-import { TorrentData } from "../Shared/utils";
+import { MDBBtn } from "mdb-react-ui-kit";
+import { toast } from "react-toastify";
+import { destroyAllTorrents, TorrentData } from "../Shared/utils";
 import { StatusTable } from "./StatusTable";
 
 interface StatusPageProps {
@@ -15,8 +17,28 @@ export function StatusPage(props: StatusPageProps) {
   // }
 
   return (
-    <div>
-      <StatusTable activeTorrents={props.activeTorrents}/>
-    </div>
+    <>
+  
+
+      <div>
+          <StatusTable activeTorrents={props.activeTorrents} />
+        </div>
+         
+      <MDBBtn style={{
+        "margin": "10px",
+
+      }}onClick={async () => { 
+        //send destoryall message to electron
+        destroyAllTorrents().then(() => {
+          toast.success("All torrents destroyed 🎉 ")
+        })
+        .catch((err) => {
+          toast.error("Error destroying torrents: " + err)
+        })
+         }}>
+        Remove All
+      </MDBBtn>
+      </>
+     
   );
 }

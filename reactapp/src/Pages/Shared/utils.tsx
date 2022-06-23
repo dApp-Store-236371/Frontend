@@ -112,6 +112,15 @@ try{
 
 }
 
+export async function destroyAllTorrents(){
+  if (IS_ON_ELECTRON) {
+    console.log("Destroying all torrents")
+    const { ipcRenderer } = window.require("electron");
+    console.log("Before ipcRenderer")
+    await ipcRenderer.invoke(ElectronMessages.ElectronMessages.DESTROY_ALL_TORRENTS);
+  }
+}
+
 
 export async function requestSeed(app: AppData){
   if (IS_ON_ELECTRON) {

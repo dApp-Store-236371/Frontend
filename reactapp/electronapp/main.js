@@ -362,6 +362,20 @@ ipcMain.handle(ElectronMessages.REMOVE_TORRENT, async(event, ...args) => {
     }
 })
 
+ipcMain.handle(ElectronMessages.DESTROY_ALL_TORRENTS, async(event, ...args) => {
+    console.log("Electron DESTROY ALL TORRENTS")
+    let res = { success: true }
+    try {
+        await stopAllTorrents()
+        torrentRecoveryData = []
+        return
+    } catch (err) {
+        res.success = false
+        console.error("Electron DESTROY ALL TORRENTS Exception: ", err)
+    } finally {
+        return res
+    }
+})
 
 
 

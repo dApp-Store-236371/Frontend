@@ -6,7 +6,7 @@ import {
   useGlobalFilter,
 } from "react-table";
 
-import {  TorrentData } from "../Shared/utils";
+import {  destroyAllTorrents, TorrentData } from "../Shared/utils";
 
 import "../../CSS/PublishedTable.css";
 // import { GlobalFilter } from "./GlobalFilter";
@@ -134,6 +134,7 @@ export function StatusTable(props: StatusTableProps)
 
   return (
     <>
+
       <table {...getTableProps()} className="purchased-table">
         <thead>
           {headerGroups.map((headerGroup) => {

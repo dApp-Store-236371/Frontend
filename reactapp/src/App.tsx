@@ -154,7 +154,7 @@ function App() {
       refreshActiveTorrentData()
 
       
-      }, 2000)
+      }, 3000)
     
 
 
