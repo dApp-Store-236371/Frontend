@@ -97,8 +97,8 @@ export function PublishedAppsTable({
               onClick={() => updateBtnHandler(value.cell.row.original)}
             >
               {
-                //isElectron()
-                true
+                isElectron()
+                
                   ? ["Update"]
                   : ["Download", <br />, "Desktop Client", <br />, " To Update"]
               }
@@ -135,7 +135,7 @@ export function PublishedAppsTable({
   const { pageIndex, globalFilter } = state;
 
   const updateBtnHandler = (rowData: AppData) => {
-    if (true /*isElectron()*/) {
+    if (isElectron()) {
       console.log("Row data to update: ", rowData);
       setSelectedAppData(rowData);
       setShowModal(true);
