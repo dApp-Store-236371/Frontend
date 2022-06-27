@@ -246,8 +246,10 @@ ipcMain.handle(ElectronMessages.ACCOUNT_ID_UPDATE, async(event, ...args) => {
 
         await reloadBackupTorrents()
 
-        torrentRecoveryData = electronStore.get(currAccountID)
-
+        torrentRecoveryData = electronStore.get(currAccountID) 
+        if (torrentRecoveryData === undefined) {
+            torrentRecoveryData = []
+        }
 
 
         return currAccountID
