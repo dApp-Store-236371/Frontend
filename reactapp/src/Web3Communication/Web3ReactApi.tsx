@@ -420,7 +420,10 @@ async function calcRequestedAppsRange(itemsPerPage: number, currPageNum: number)
   const totalNumOfApps = await getTotalNumOfApps();
 
   const numberOfPages = Math.ceil(totalNumOfApps / itemsPerPage);
-  const appsOnLastPage = totalNumOfApps % itemsPerPage;
+  let appsOnLastPage = totalNumOfApps % itemsPerPage;
+  if (appsOnLastPage === 0) {
+    appsOnLastPage = itemsPerPage;
+  }
   console.log("totalNumOfApps", totalNumOfApps);
   console.log("itemsPerPage", itemsPerPage);
   console.log("appsOnLastPage: ", appsOnLastPage);
@@ -430,8 +433,8 @@ async function calcRequestedAppsRange(itemsPerPage: number, currPageNum: number)
 
 
   if (currPageNum === numberOfPages - 1) {
-    console.log("Last Page. marking appsOnLastPage: ", Math.max(1, appsOnLastPage));
-    requested_len = Math.max(1, appsOnLastPage);
+    console.log("Last Page. marking appsOnLastPage: ", appsOnLastPage);
+    requested_len = appsOnLastPage;
   }
 
   console.log("page: ", currPageNum);

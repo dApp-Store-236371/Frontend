@@ -110,7 +110,7 @@ function App() {
     try{
         if(isElectron()) {
           let activeTorrentsData: TorrentData[] = await getActiveTorrentData();
-          console.debug("Active torrents data: " + JSON.stringify(activeTorrentsData));
+          console.debug("Active torrents data Received: ",activeTorrentsData);
          // setOwnedApps(await getOwnedApps());
          const myApps: AppData[] = await getOwnedApps()
           activeTorrentsData = activeTorrentsData.map(torrentData => {
@@ -121,7 +121,7 @@ function App() {
             let appData = myApps.find(app => app.magnetLink === torrentData.magnet);
             if(torrentData.appId !== undefined){
               console.log("refreshActiveTorrentData appId is not undefined")
-              appData = myApps.find(app => app.id === torrentData.appId);
+              // appData = myApps.find(app => app.id === torrentData.appId);
             }
 
             if (appData === undefined &&  torrentData.sha !== undefined) {
@@ -140,6 +140,7 @@ function App() {
             }
             return torrentData;
           })
+          //console.warn("refreshActiveTorrentData returning activeTorrentsData: ", activeTorrentsData);
           setActiveTorrents(activeTorrentsData);
         }
         
